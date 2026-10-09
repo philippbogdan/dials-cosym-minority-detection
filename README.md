@@ -1,0 +1,24 @@
+# Files
+
+- GOAL.md
+- PROBLEM.md
+- PREREGISTRATION.md
+- COMPLETE.md
+- FINDINGS.md
+- REPORT.md
+- WORKLOG.md
+- reproduce.sh
+- REPRODUCTION.md
+- PROVENANCE.json
+- SOURCES.md
+- LICENSE
+- licences/
+- requirements-report.txt
+- cf/
+- data/
+- dials-patch/
+- docs-src/
+- infra/
+- pipeline/
+- results/
+- tests/

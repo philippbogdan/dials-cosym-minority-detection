@@ -1,0 +1,118 @@
+From aa204e672bd34c05f3799a61d4b1767803eb7012 Mon Sep 17 00:00:00 2001
+From: Philipp Bogdan <174341097+philippbogdan@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 14:23:15 +0100
+Subject: [PATCH] correlation groups: min_group_size (default 5, OPTICS's own
+ smallest cluster here): smaller groups return to the background population
+
+---
+ src/dials/algorithms/correlation/analysis.py | 10 +++++++++-
+ src/dials/algorithms/correlation/groups.py   | 12 ++++++++++++
+ tests/algorithms/correlation/test_groups.py  | 20 +++++++++++++++++++-
+ 3 files changed, 40 insertions(+), 2 deletions(-)
+
+diff --git a/src/dials/algorithms/correlation/analysis.py b/src/dials/algorithms/correlation/analysis.py
+index 855e528..05bfe37 100644
+--- a/src/dials/algorithms/correlation/analysis.py
++++ b/src/dials/algorithms/correlation/analysis.py
+@@ -90,6 +90,13 @@
+     min_usable_pairs = 3
+       .type = int(value_min=0)
+       .help = "Data sets with fewer correlations that have an error are not judged."
++    min_group_size = 5
++      .type = int(value_min=2)
++      .help = "Groups smaller than this are not taken out of the OPTICS clusters. The default"
++              "is OPTICS's own smallest cluster here (min_samples >= 5): no group smaller than"
++              "DIALS reports without the option is reported, because crystals of one sample can"
++              "hold sub-groups of two to four as distinct as a different species (room-temperature"
++              "insulin). Down to 2 for samples known to hold no such structure."
+     noise_model = analytic bootstrap *both
+       .type = choice
+       .help = "Counting noise of the pairwise correlations: analytic, the large-sample error"
+@@ -873,6 +880,7 @@ def find_small_groups(self):
+         """
+         from dials.algorithms.correlation.groups import (
+             GroupDetection,
++            apply_min_group_size,
+             combine_groups,
+             dense_from_target,
+             noise_replicates,
+@@ -914,7 +922,7 @@ def find_small_groups(self):
+             )
+         found = [d.run() for d in runs]
+         groups = found[0] if len(found) == 1 else combine_groups(found[0], found[1], len(rij))
+-        groups = sorted(groups, key=len, reverse=True)
++        groups = apply_min_group_size(groups, gp.min_group_size)
+         detection = runs[0]
+         for step in [s for d in runs for s in d.log]:
+             logger.info(
+diff --git a/src/dials/algorithms/correlation/groups.py b/src/dials/algorithms/correlation/groups.py
+index 1ff555e..77c8aef 100644
+--- a/src/dials/algorithms/correlation/groups.py
++++ b/src/dials/algorithms/correlation/groups.py
+@@ -520,6 +520,18 @@ def take_out_groups(labels, groups):
+     return new
+ 
+ 
++def apply_min_group_size(groups, min_group_size):
++    """The populations with every group smaller than min_group_size returned to the background (the
++    largest population), largest first."""
++    groups = sorted((np.asarray(g) for g in groups), key=len, reverse=True)
++    if len(groups) <= 1:
++        return groups
++    kept = [g for g in groups[1:] if len(g) >= min_group_size]
++    small = [g for g in groups[1:] if len(g) < min_group_size]
++    background = np.sort(np.concatenate([groups[0]] + small)) if small else groups[0]
++    return sorted([background] + kept, key=len, reverse=True)
++
++
+ def combine_groups(first, second, n):
+     """Populations from two detector runs on the same n data sets (e.g. the two noise
+     models): the groups the first reports (every group but its background population, the
+diff --git a/tests/algorithms/correlation/test_groups.py b/tests/algorithms/correlation/test_groups.py
+index 345f15e..8c8411e 100644
+--- a/tests/algorithms/correlation/test_groups.py
++++ b/tests/algorithms/correlation/test_groups.py
+@@ -10,6 +10,7 @@
+ from dials.algorithms.correlation.groups import (
+     GroupDetection,
+     analytic_replicates,
++    apply_min_group_size,
+     bootstrap_replicates,
+     dense_from_target,
+     effective_sizes,
+@@ -215,7 +216,12 @@ def test_groups_taken_out_of_a_single_optics_cluster(
+         phil=phil_scope, read_reflections=True, read_experiments=True, check_format=False
+     )
+     params, _ = parser.parse_args(
+-        args=args + ["significant_clusters.find_small_groups=True"], show_diff_phil=False
++        args=args
++        + [
++            "significant_clusters.find_small_groups=True",
++            "significant_clusters.groups.min_group_size=2",
++        ],
++        show_diff_phil=False,
+     )
+     reflections, experiments = reflections_and_experiments_from_files(
+         params.input.reflections, params.input.experiments
+@@ -322,6 +328,18 @@ def test_take_out_groups():
+     assert take_out_groups([0, 0, 1, 1], [[0, 1, 2, 3]]).tolist() == [0, 0, 1, 1]
+ 
+ 
++def test_min_group_size():
++    # groups smaller than the minimum return to the largest population
++    groups = [np.arange(0, 9), np.array([9, 10]), np.array([11, 12, 13, 14, 15])]
++    out = apply_min_group_size(groups, 5)
++    assert [g.tolist() for g in out] == [list(range(0, 11)), [11, 12, 13, 14, 15]]
++    assert [g.tolist() for g in apply_min_group_size(groups, 2)] == [
++        list(range(0, 9)),
++        [11, 12, 13, 14, 15],
++        [9, 10],
++    ]
++
++
+ def test_combine_groups():
+     # the first run reports a pair; the second a triple elsewhere and a group overlapping the
+     # pair: the triple is added, the overlapping group is not, the rest is the background
+-- 
+2.54.0 (Apple Git-157)
+

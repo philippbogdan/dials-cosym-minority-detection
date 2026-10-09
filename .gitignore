@@ -1,0 +1,14 @@
+/.venv*
+.tmp/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+/external
+.cf_commit
+results/report/
+results/cmat/
+results/boot*/
+dials.scale.html
+dials.scale.log

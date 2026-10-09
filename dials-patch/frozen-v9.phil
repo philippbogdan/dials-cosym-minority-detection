@@ -1,0 +1,20 @@
+# v9 (PREREGISTRATION.md amendment 22; dials-patch/0001-0013, PATCH_MAX=13): v7, and a group smaller
+# than 5 taken out when its coherence stands 30 standard errors out of the counting noise, 2 above
+# 0.01 * 2 / k and 1.5 times above the strongest structure of its size inside the rest; smaller groups
+# are merged into the largest population before the take-out (0001-0013).
+significant_clusters.find_small_groups = True
+significant_clusters.groups.significance = 0.01
+significant_clusters.groups.separation_ratio = 3.5
+significant_clusters.groups.min_population = 5
+significant_clusters.groups.min_coherence = 0.05
+significant_clusters.groups.pair_significance = 0.001
+significant_clusters.groups.min_usable_pairs = 3
+significant_clusters.groups.min_group_size = 5
+significant_clusters.groups.small_groups.min_signal_to_noise = 30
+significant_clusters.groups.small_groups.max_se = None
+significant_clusters.groups.small_groups.z = 2
+significant_clusters.groups.small_groups.min_coherence = 0.01
+significant_clusters.groups.small_groups.min_ratio = 1.5
+significant_clusters.groups.noise_model = both
+significant_clusters.groups.n_replicates = 100
+significant_clusters.groups.seed = 0

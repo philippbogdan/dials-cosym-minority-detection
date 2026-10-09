@@ -1,0 +1,1 @@
+{"proc": "p6", "alpha": 0.01, "ratio": 3.5, "criterion": "either", "abs_min": 0.03, "abs_test": true, "abs_alpha": 0.2, "noise": "analytic"}

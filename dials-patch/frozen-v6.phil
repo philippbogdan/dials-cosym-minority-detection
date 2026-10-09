@@ -1,0 +1,15 @@
+# The proposed procedure as evaluated (frozen in PREREGISTRATION.md amendment 12, tag
+# frozen-v6): today's DIALS 3.30.1 defaults, plus the calibrated small-group detector of
+# dials-patch/0001-0007 (run with the analytic and the bootstrap counting noise, groups
+# combined; min_coherence 0.05 for a pair, 0.05 * 2 / k for a group of k; pairs need
+# p < 0.001 with the analytic noise).
+significant_clusters.find_small_groups = True
+significant_clusters.groups.significance = 0.01
+significant_clusters.groups.separation_ratio = 3.5
+significant_clusters.groups.min_population = 5
+significant_clusters.groups.min_coherence = 0.05
+significant_clusters.groups.pair_significance = 0.001
+significant_clusters.groups.min_usable_pairs = 3
+significant_clusters.groups.noise_model = both
+significant_clusters.groups.n_replicates = 100
+significant_clusters.groups.seed = 0

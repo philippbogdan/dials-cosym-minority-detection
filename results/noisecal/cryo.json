@@ -1,0 +1,137 @@
+{
+ "0.2|bovine": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.19588545764022214,
+  "observed_over_parametric": 0.6933250185991808,
+  "observed_over_parametric_kappa": 0.5834702441190772,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.7597271200999641
+ },
+ "0.2|porcine": {
+  "n_segments": 4,
+  "n_pairs": 64,
+  "observed_over_reflection": 0.4296528443743761,
+  "observed_over_parametric": 1.3835824391481897,
+  "observed_over_parametric_kappa": 0.7918462968087495,
+  "n_pairs_analytic": 64,
+  "observed_over_analytic": 1.4333141324868388
+ },
+ "0.2|human": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.2072735428955304,
+  "observed_over_parametric": 1.1987731070276133,
+  "observed_over_parametric_kappa": 0.8207449546221963,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.7917466155399012
+ },
+ "0.3|bovine": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.3291497329401007,
+  "observed_over_parametric": 1.503187016939312,
+  "observed_over_parametric_kappa": 0.6972966177350096,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.8872817569517423
+ },
+ "0.3|porcine": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.39659677032935603,
+  "observed_over_parametric": 2.6743645689135596,
+  "observed_over_parametric_kappa": 0.7492384063285684,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.9297626127922485
+ },
+ "0.3|human": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.3398678096301495,
+  "observed_over_parametric": 2.5828536534124487,
+  "observed_over_parametric_kappa": 0.7260735621636814,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.7041802422095647
+ },
+ "0.4|bovine": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.5415246462423553,
+  "observed_over_parametric": 2.3321054129634295,
+  "observed_over_parametric_kappa": 0.7789721040234078,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.5582947638857569
+ },
+ "0.4|porcine": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.6347506743269616,
+  "observed_over_parametric": 3.8925470464893057,
+  "observed_over_parametric_kappa": 0.8792934933667055,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.9227630000645283
+ },
+ "0.4|human": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.5526270697056891,
+  "observed_over_parametric": 3.383961455968517,
+  "observed_over_parametric_kappa": 0.9518712233365829,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.5759941890402648
+ },
+ "0.5|bovine": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.7447699769470848,
+  "observed_over_parametric": 2.642385740900002,
+  "observed_over_parametric_kappa": 0.7732130542240087,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.620467511362344
+ },
+ "0.5|porcine": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.791416400966248,
+  "observed_over_parametric": 4.742084955295739,
+  "observed_over_parametric_kappa": 0.9613093429744473,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.8680730363802297
+ },
+ "0.5|human": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.8781244978705433,
+  "observed_over_parametric": 4.5806978506788765,
+  "observed_over_parametric_kappa": 0.9948205649644943,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.5643472788840084
+ },
+ "1|bovine": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.9202682115245892,
+  "observed_over_parametric": 3.3125221163111576,
+  "observed_over_parametric_kappa": 0.65972204119795,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.8569473779694883
+ },
+ "1|porcine": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 1.2122384357949996,
+  "observed_over_parametric": 7.299428070849088,
+  "observed_over_parametric_kappa": 1.0461236885987855,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 1.2759672041478007
+ },
+ "1|human": {
+  "n_segments": 4,
+  "n_pairs": 66,
+  "observed_over_reflection": 0.978629215022396,
+  "observed_over_parametric": 3.5453032288042365,
+  "observed_over_parametric_kappa": 0.7205978621695929,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.6863299717639587
+ }
+}

@@ -1,0 +1,36 @@
+{
+ "collection": "cryo",
+ "crystal": "X5_1",
+ "species": "human",
+ "dials_version": "DIALS 3.30",
+ "n_images": 100,
+ "oscillation": [
+  0.0,
+  0.1
+ ],
+ "image_range": [
+  1,
+  100
+ ],
+ "unit_cell": [
+  67.63983369861973,
+  67.64882419406156,
+  67.65411152258675,
+  109.47760565615839,
+  109.4691572914316,
+  109.46336769932832
+ ],
+ "space_group": "P 1",
+ "n_strong": 11608,
+ "n_indexed": 11521,
+ "n_integrated_prf": 28774,
+ "n_integrated_sum": 33529,
+ "n_reflections": 34348,
+ "wavelength": 0.9998699999999993,
+ "index_retry": false,
+ "rmsd_xy_phi": [
+  0.15903,
+  0.18852,
+  0.057667
+ ]
+}

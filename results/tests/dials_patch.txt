@@ -1,0 +1,51 @@
+3a0071062243636b6d46a2398a9f2e90  dials-patch/0001-correlation-find-small-groups.patch
+c6883faadb2dc67e8a04b00d888abb7c  dials-patch/0002-correlation-groups-min-coherence.patch
+6e690ee78f3b4cc02daa6254c1809291  dials-patch/0003-correlation-groups-min-coherence-0.05.patch
+688d09d68aa364c5506e20b6829687a0  dials-patch/0004-correlation-groups-min-coherence-scales-with-size.patch
+bb005a182a1900ba12b81d7c385a6cac  dials-patch/0005-correlation-groups-analytic-noise-usable-pairs.patch
+54de6a7b4cec1a84c25852a24fa00f59  dials-patch/0006-correlation-groups-take-out-groups.patch
+3d32128243d93db1f1c24262cd307f94  dials-patch/0007-correlation-groups-two-noise-models.patch
+9f0251e1ffb0b45dea1e49b6fdf9b9d8  dials-patch/0008-correlation-groups-silhouette-log.patch
+32b9e20c5846065ba9b60c67d85323a0  dials-patch/0009-correlation-groups-fast-bootstrap.patch
+ad053fa17c4e41ff93dd32b4c6265d21  dials-patch/0010-correlation-groups-min-group-size.patch
+6d242047bfdb87492772f484f5ab14ea  dials-patch/0011-correlation-groups-small-groups.patch
+3e899e8f28f069613d6edd131c9f61e2  dials-patch/0012-correlation-groups-small-groups-signal-to-noise.patch
+27436917d8d6d3f4690014dbdb4d5e97  dials-patch/0013-correlation-groups-ruff.patch
+4b78d19b147d453bdd3d851af546bef0  dials-patch/0014-correlation-groups-take-out-before-size.patch
+0adb8e3ab75e1b1bd2391ed5b51f4fc0  dials-patch/0015-correlation-groups-small-groups-precise.patch
+overlay: overlay_v11, PATCH_MAX=none
+................................................                         [100%]
+=============================== warnings summary ===============================
+../../.venv-dials/env/lib/python3.12/site-packages/_pytest/config/__init__.py:1464
+  ./.venv-dials/env/lib/python3.12/site-packages/_pytest/config/__init__.py:1464: PytestConfigWarning: Unknown config option: ini-options
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+tests/algorithms/correlation/test_analysis.py: 3 warnings
+tests/algorithms/correlation/test_groups.py: 8 warnings
+  ./.venv-dials/env/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=2260914) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/algorithms/correlation/test_analysis.py: 12 warnings
+  ./.venv-dials/env/lib/python3.12/site-packages/sklearn/cluster/_optics.py:664: UserWarning: All reachability values are inf. Set a larger max_eps or all data will be considered outliers.
+    warnings.warn(
+
+tests/algorithms/correlation/test_groups.py::test_find_small_groups_in_correlation_matrix
+  ./external/dials/tests/algorithms/correlation/test_groups.py:185: UserWarning: pathlib argument is deprecated: Using Pathlib is now the default (and only) option.
+    mcp = dials_data("vmxi_proteinase_k_sweeps", pathlib=True)
+
+tests/algorithms/correlation/test_groups.py::test_groups_taken_out_of_a_single_optics_cluster
+  ./external/dials/tests/algorithms/correlation/test_groups.py:237: UserWarning: pathlib argument is deprecated: Using Pathlib is now the default (and only) option.
+    mcp = dials_data("vmxi_proteinase_k_sweeps", pathlib=True)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+48 passed, 29 warnings in 1045.96s (0:17:25)

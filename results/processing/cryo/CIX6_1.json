@@ -1,0 +1,36 @@
+{
+ "collection": "cryo",
+ "crystal": "CIX6_1",
+ "species": "bovine",
+ "dials_version": "DIALS 3.30",
+ "n_images": 100,
+ "oscillation": [
+  0.0,
+  0.1
+ ],
+ "image_range": [
+  1,
+  100
+ ],
+ "unit_cell": [
+  67.61216021866069,
+  67.46783543495981,
+  67.47803393984786,
+  109.46915785990767,
+  109.45889437650436,
+  109.48684503138199
+ ],
+ "space_group": "P 1",
+ "n_strong": 5330,
+ "n_indexed": 5039,
+ "n_integrated_prf": 28636,
+ "n_integrated_sum": 33297,
+ "n_reflections": 34500,
+ "wavelength": 0.9998700000000001,
+ "index_retry": false,
+ "rmsd_xy_phi": [
+  0.16919,
+  0.18538,
+  0.18451
+ ]
+}

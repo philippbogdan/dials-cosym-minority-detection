@@ -1,0 +1,137 @@
+{
+ "0.2|bovine": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.9624167904991724
+ },
+ "0.2|porcine": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 64,
+  "observed_over_analytic": 1.5891329477804652
+ },
+ "0.2|human": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.9598076840611866
+ },
+ "0.3|bovine": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 1.5366530442951698
+ },
+ "0.3|porcine": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 0.9972927918644791
+ },
+ "0.3|human": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 1.2883955277714787
+ },
+ "0.4|bovine": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 1.469567120755777
+ },
+ "0.4|porcine": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 1.0691146822534707
+ },
+ "0.4|human": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 1.2839029992637458
+ },
+ "0.5|bovine": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 1.279658113598627
+ },
+ "0.5|porcine": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 1.4413973678279552
+ },
+ "0.5|human": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 1.5043409322204628
+ },
+ "1|bovine": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 1.6487811643046784
+ },
+ "1|porcine": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 1.319165450474006
+ },
+ "1|human": {
+  "n_segments": 4,
+  "n_pairs": 0,
+  "observed_over_reflection": null,
+  "observed_over_parametric": null,
+  "observed_over_parametric_kappa": null,
+  "n_pairs_analytic": 66,
+  "observed_over_analytic": 1.6950885535050377
+ }
+}

@@ -1,0 +1,1023 @@
+DIALS 3.30
+The following parameters have been modified:
+
+output {
+  json = dials.correlation_matrix.json
+}
+
+Filtering reflections for dataset 0
+Read 3590 predicted reflections
+Selected 1921 scaled reflections
+Removed 46 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 1
+Read 3621 predicted reflections
+Selected 1896 scaled reflections
+Removed 76 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 2
+Read 3573 predicted reflections
+Selected 1922 scaled reflections
+Removed 61 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 3
+Read 3621 predicted reflections
+Selected 1884 scaled reflections
+Removed 48 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 4
+Read 3564 predicted reflections
+Selected 1889 scaled reflections
+Removed 51 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 5
+Read 3533 predicted reflections
+Selected 1893 scaled reflections
+Removed 106 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 6
+Read 3551 predicted reflections
+Selected 1885 scaled reflections
+Removed 75 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 7
+Read 3550 predicted reflections
+Selected 1872 scaled reflections
+Removed 60 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 8
+Read 3609 predicted reflections
+Selected 1915 scaled reflections
+Removed 50 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 9
+Read 3524 predicted reflections
+Selected 1926 scaled reflections
+Removed 118 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 10
+Read 3507 predicted reflections
+Selected 1898 scaled reflections
+Removed 136 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 11
+Read 3556 predicted reflections
+Selected 1873 scaled reflections
+Removed 79 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 12
+Read 3570 predicted reflections
+Selected 1914 scaled reflections
+Removed 80 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 13
+Read 3500 predicted reflections
+Selected 1834 scaled reflections
+Removed 76 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 14
+Read 3475 predicted reflections
+Selected 1846 scaled reflections
+Removed 84 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 15
+Read 3550 predicted reflections
+Selected 1893 scaled reflections
+Removed 81 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 16
+Read 3467 predicted reflections
+Selected 1757 scaled reflections
+Removed 80 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 17
+Read 3468 predicted reflections
+Selected 1788 scaled reflections
+Removed 84 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 18
+Read 3474 predicted reflections
+Selected 1795 scaled reflections
+Removed 62 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 19
+Read 3548 predicted reflections
+Selected 1832 scaled reflections
+Removed 63 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 20
+Read 3499 predicted reflections
+Selected 1822 scaled reflections
+Removed 63 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 21
+Read 3526 predicted reflections
+Selected 1829 scaled reflections
+Removed 57 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 22
+Read 3481 predicted reflections
+Selected 1825 scaled reflections
+Removed 72 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 23
+Read 3470 predicted reflections
+Selected 1823 scaled reflections
+Removed 74 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 24
+Read 3625 predicted reflections
+Selected 1825 scaled reflections
+Removed 38 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 25
+Read 3587 predicted reflections
+Selected 1877 scaled reflections
+Removed 30 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 26
+Read 3612 predicted reflections
+Selected 1832 scaled reflections
+Removed 31 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 27
+Read 3584 predicted reflections
+Selected 1807 scaled reflections
+Removed 37 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 28
+Read 3570 predicted reflections
+Selected 1955 scaled reflections
+Removed 129 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 29
+Read 3576 predicted reflections
+Selected 1934 scaled reflections
+Removed 90 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 30
+Read 3560 predicted reflections
+Selected 1897 scaled reflections
+Removed 104 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 31
+Read 3617 predicted reflections
+Selected 1856 scaled reflections
+Removed 31 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 32
+Read 3517 predicted reflections
+Selected 1878 scaled reflections
+Removed 107 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 33
+Read 3601 predicted reflections
+Selected 1919 scaled reflections
+Removed 83 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 34
+Read 3503 predicted reflections
+Selected 1904 scaled reflections
+Removed 125 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Filtering reflections for dataset 35
+Read 3542 predicted reflections
+Selected 1932 scaled reflections
+Removed 94 reflections below partiality threshold
+Removed 0 intensity.scale.value reflections with I/Sig(I) < -5
+Patterson group: I m -3 m (y+z,x+z,x+y)
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 1
+
+ML estimate of overall B value:
+   10.28 A**2
+ML estimate of  -log of scale factor:
+  -2.23
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 2
+
+ML estimate of overall B value:
+   13.02 A**2
+ML estimate of  -log of scale factor:
+  -2.14
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 3
+
+ML estimate of overall B value:
+   12.19 A**2
+ML estimate of  -log of scale factor:
+  -2.18
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 4
+
+ML estimate of overall B value:
+   13.69 A**2
+ML estimate of  -log of scale factor:
+  -2.14
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 5
+
+ML estimate of overall B value:
+   12.77 A**2
+ML estimate of  -log of scale factor:
+  -2.15
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 6
+
+ML estimate of overall B value:
+   13.70 A**2
+ML estimate of  -log of scale factor:
+  -2.13
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 7
+
+ML estimate of overall B value:
+   13.33 A**2
+ML estimate of  -log of scale factor:
+  -2.15
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 8
+
+ML estimate of overall B value:
+   13.26 A**2
+ML estimate of  -log of scale factor:
+  -2.18
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 9
+
+ML estimate of overall B value:
+   13.52 A**2
+ML estimate of  -log of scale factor:
+  -2.12
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 10
+
+ML estimate of overall B value:
+   12.88 A**2
+ML estimate of  -log of scale factor:
+  -2.13
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 11
+
+ML estimate of overall B value:
+   13.80 A**2
+ML estimate of  -log of scale factor:
+  -2.09
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 12
+
+ML estimate of overall B value:
+   12.79 A**2
+ML estimate of  -log of scale factor:
+  -2.13
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 13
+
+ML estimate of overall B value:
+   11.19 A**2
+ML estimate of  -log of scale factor:
+  -2.23
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 14
+
+ML estimate of overall B value:
+   12.75 A**2
+ML estimate of  -log of scale factor:
+  -2.17
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 15
+
+ML estimate of overall B value:
+   10.52 A**2
+ML estimate of  -log of scale factor:
+  -2.24
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 16
+
+ML estimate of overall B value:
+   10.87 A**2
+ML estimate of  -log of scale factor:
+  -2.24
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 17
+
+ML estimate of overall B value:
+   11.50 A**2
+ML estimate of  -log of scale factor:
+  -2.24
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 18
+
+ML estimate of overall B value:
+   11.29 A**2
+ML estimate of  -log of scale factor:
+  -2.19
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 19
+
+ML estimate of overall B value:
+    9.54 A**2
+ML estimate of  -log of scale factor:
+  -2.36
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 20
+
+ML estimate of overall B value:
+   10.83 A**2
+ML estimate of  -log of scale factor:
+  -2.21
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 21
+
+ML estimate of overall B value:
+   10.87 A**2
+ML estimate of  -log of scale factor:
+  -2.24
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 22
+
+ML estimate of overall B value:
+   10.89 A**2
+ML estimate of  -log of scale factor:
+  -2.19
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 23
+
+ML estimate of overall B value:
+   12.94 A**2
+ML estimate of  -log of scale factor:
+  -2.17
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 24
+
+ML estimate of overall B value:
+   12.28 A**2
+ML estimate of  -log of scale factor:
+  -2.18
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 25
+
+ML estimate of overall B value:
+   14.08 A**2
+ML estimate of  -log of scale factor:
+  -2.12
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 26
+
+ML estimate of overall B value:
+   17.65 A**2
+ML estimate of  -log of scale factor:
+  -1.99
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 27
+
+ML estimate of overall B value:
+   17.91 A**2
+ML estimate of  -log of scale factor:
+  -1.95
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 28
+
+ML estimate of overall B value:
+   15.74 A**2
+ML estimate of  -log of scale factor:
+  -2.08
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 29
+
+ML estimate of overall B value:
+   15.29 A**2
+ML estimate of  -log of scale factor:
+  -2.06
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 30
+
+ML estimate of overall B value:
+   15.28 A**2
+ML estimate of  -log of scale factor:
+  -2.06
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 31
+
+ML estimate of overall B value:
+   15.67 A**2
+ML estimate of  -log of scale factor:
+  -2.05
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 32
+
+ML estimate of overall B value:
+   16.35 A**2
+ML estimate of  -log of scale factor:
+  -2.02
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 33
+
+ML estimate of overall B value:
+   14.71 A**2
+ML estimate of  -log of scale factor:
+  -2.13
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 34
+
+ML estimate of overall B value:
+   14.29 A**2
+ML estimate of  -log of scale factor:
+  -2.08
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 35
+
+ML estimate of overall B value:
+   13.92 A**2
+ML estimate of  -log of scale factor:
+  -2.13
+
+--------------------------------------------------------------------------------
+
+Normalising intensities for dataset 36
+
+ML estimate of overall B value:
+   11.85 A**2
+ML estimate of  -log of scale factor:
+  -2.17
+
+--------------------------------------------------------------------------------
+
+Estimation of resolution for Laue group analysis
+
+Removing 1 Wilson outliers with E^2 >= 16.0
+Resolution estimate from <I>/<σ(I)> > 4.0 : 1.82
+Resolution estimate from CC½ > 0.60: 1.45
+High resolution limit set to: 1.45
+Selecting 47407 reflections with d > 1.45
+Setting nproc=8
+Calculating rij matrix elements in 36 row-blocks
+Calculated rij matrix for row-block 1
+Calculated rij matrix for row-block 2
+Calculated rij matrix for row-block 3
+Calculated rij matrix for row-block 4
+Calculated rij matrix for row-block 5
+Calculated rij matrix for row-block 6
+Calculated rij matrix for row-block 7
+Calculated rij matrix for row-block 8
+Calculated rij matrix for row-block 9
+Calculated rij matrix for row-block 10
+Calculated rij matrix for row-block 11
+Calculated rij matrix for row-block 12
+Calculated rij matrix for row-block 13
+Calculated rij matrix for row-block 14
+Calculated rij matrix for row-block 15
+Calculated rij matrix for row-block 16
+Calculated rij matrix for row-block 17
+Calculated rij matrix for row-block 18
+Calculated rij matrix for row-block 19
+Calculated rij matrix for row-block 20
+Calculated rij matrix for row-block 21
+Calculated rij matrix for row-block 22
+Calculated rij matrix for row-block 23
+Calculated rij matrix for row-block 24
+Calculated rij matrix for row-block 25
+Calculated rij matrix for row-block 26
+Calculated rij matrix for row-block 27
+Calculated rij matrix for row-block 28
+Calculated rij matrix for row-block 29
+Calculated rij matrix for row-block 30
+Calculated rij matrix for row-block 31
+Calculated rij matrix for row-block 32
+Calculated rij matrix for row-block 33
+Calculated rij matrix for row-block 34
+Calculated rij matrix for row-block 35
+Calculated rij matrix for row-block 36
+================================================================================
+
+Automatic determination of number of dimensions for analysis
+Testing dimension: 1/36
+Testing dimension: 2/36
+Testing dimension: 3/36
+Testing dimension: 4/36
+Testing dimension: 5/36
+Testing dimension: 6/36
+Testing dimension: 7/36
+Testing dimension: 8/36
+Testing dimension: 9/36
+Testing dimension: 10/36
+Testing dimension: 11/36
+Testing dimension: 12/36
+Testing dimension: 13/36
+Testing dimension: 14/36
+Testing dimension: 15/36
+Testing dimension: 16/36
+Testing dimension: 17/36
+Testing dimension: 18/36
+Testing dimension: 19/36
+Testing dimension: 20/36
+Testing dimension: 21/36
+Testing dimension: 22/36
+Testing dimension: 23/36
+Testing dimension: 24/36
+Testing dimension: 25/36
+Testing dimension: 26/36
+Testing dimension: 27/36
+Testing dimension: 28/36
+Testing dimension: 29/36
+Testing dimension: 30/36
+Testing dimension: 31/36
+Testing dimension: 32/36
+Testing dimension: 33/36
+Testing dimension: 34/36
+Testing dimension: 35/36
+Testing dimension: 36/36
++--------------+--------------+
+|   Dimensions |   Functional |
+|--------------+--------------|
+|            1 |  0.127928    |
+|            2 |  0.0449862   |
+|            3 |  0.0206041   |
+|            4 |  0.0183312   |
+|            5 |  0.0145556   |
+|            6 |  0.0134455   |
+|            7 |  0.0125938   |
+|            8 |  0.0112616   |
+|            9 |  0.010914    |
+|           10 |  0.00914197  |
+|           11 |  0.0117357   |
+|           12 |  0.00655944  |
+|           13 |  0.0043254   |
+|           14 |  0.00448582  |
+|           15 |  0.00284163  |
+|           16 |  0.00285599  |
+|           17 |  0.00243343  |
+|           18 |  0.00201861  |
+|           19 |  0.00117463  |
+|           20 |  0.00120725  |
+|           21 |  0.000918356 |
+|           22 |  0.000715473 |
+|           23 |  0.000486327 |
+|           24 |  0.000354909 |
+|           25 |  0.000194866 |
+|           26 |  0.000152035 |
+|           27 |  9.08408e-05 |
+|           28 |  4.49164e-05 |
+|           29 |  2.9034e-05  |
+|           30 |  3.9793e-05  |
+|           31 |  3.76719e-06 |
+|           32 |  1.07525e-05 |
+|           33 |  1.192e-06   |
+|           34 |  1.26272e-06 |
+|           35 |  9.82825e-07 |
+|           36 |  1.06266e-06 |
++--------------+--------------+
+Best number of dimensions: 3
+Using 3 dimensions for analysis
+Dimensions used for clustering PCA: 3
+Principal component analysis:
+Explained variance: 0.019, 0.011, 4.5e-05
+Explained variance ratio: 0.64, 0.36, 0.0015
+
+Calculating Correlation Matrix (rij matrix - see dials.cosym)
+Hierarchical clustering performed using the ward linkage method
+
+Intensity correlation clustering summary:
+=========  ==============  ===============================================================================  ========  ==============  ==============
+  Cluster    No. datasets  Datasets                                                                           Height    Multiplicity    Completeness
+=========  ==============  ===============================================================================  ========  ==============  ==============
+        1               2  25 31                                                                              0.0038             1.1            0.2
+        2               2  4 8                                                                                0.0041             1.1            0.2
+        3               2  1 11                                                                               0.0044             1.1            0.19
+        4               2  24 26                                                                              0.0046             1.1            0.19
+        5               2  22 23                                                                              0.005              1.1            0.19
+        6               2  28 33                                                                              0.0064             1.1            0.2
+        7               2  12 15                                                                              0.0072             1.1            0.2
+        8               2  5 6                                                                                0.0078             1.1            0.2
+        9               3  24 26 32                                                                           0.0083             1.2            0.27
+       10               2  14 16                                                                              0.0084             1.1            0.19
+       11               3  3 4 8                                                                              0.0087             1.2            0.28
+       12               2  13 21                                                                              0.0087             1.1            0.2
+       13               3  25 27 31                                                                           0.0088             1.2            0.28
+       14               2  17 18                                                                              0.0089             1.1            0.19
+       15               4  24 26 29 32                                                                        0.01               1.2            0.35
+       16               5  24 26 29 32 34                                                                     0.011              1.3            0.41
+       17               2  2 7                                                                                0.011              1.1            0.2
+       18               3  2 7 10                                                                             0.012              1.2            0.28
+       19               2  0 9                                                                                0.013              1.1            0.2
+       20               3  13 20 21                                                                           0.014              1.1            0.28
+       21               2  30 35                                                                              0.014              1.1            0.2
+       22               4  0 5 6 9                                                                            0.015              1.2            0.36
+       23               4  12 15 22 23                                                                        0.015              1.2            0.35
+       24               7  24 26 29 30 32 34 35                                                               0.016              1.4            0.52
+       25               7  0 3 4 5 6 8 9                                                                      0.02               1.4            0.54
+       26               9  24 26 28 29 30 32 33 34 35                                                         0.02               1.6            0.62
+       27               9  0 1 3 4 5 6 8 9 11                                                                 0.023              1.6            0.63
+       28               5  13 14 16 20 21                                                                     0.028              1.3            0.4
+       29              12  0 1 2 3 4 5 6 7 8 9 10 11                                                          0.036              1.8            0.72
+       30              12  24 25 26 27 28 29 30 31 32 33 34 35                                                0.04               1.8            0.71
+       31               7  13 14 16 17 18 20 21                                                               0.041              1.4            0.52
+       32               5  12 15 19 22 23                                                                     0.064              1.3            0.42
+       33              12  12 13 14 15 16 17 18 19 20 21 22 23                                                0.076              1.8            0.71
+       34              24  0 1 2 3 4 5 6 7 8 9 10 11 24 25 26 27 28 29 30 31 32 33 34 35                      0.18               2.8            0.91
+       35              36  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29    0.23               4              0.97
+                           30 31 32 33 34 35
+=========  ==============  ===============================================================================  ========  ==============  ==============
+
+Calculating Cos Angle Matrix from optimised cosym coordinates (see dials.cosym)
+Hierarchical clustering performed using the ward linkage method
+
+Cos(angle) clustering summary:
+=========  ==============  ===============================================================================  ========  ==============  ==============
+  Cluster    No. datasets  Datasets                                                                           Height    Multiplicity    Completeness
+=========  ==============  ===============================================================================  ========  ==============  ==============
+        1               2  2 6                                                                               3.6e-05             1.1            0.2
+        2               2  1 3                                                                               4.3e-05             1.1            0.2
+        3               2  29 34                                                                             4.4e-05             1.1            0.2
+        4               2  13 17                                                                             7.3e-05             1.1            0.19
+        5               2  27 33                                                                             0.00013             1.1            0.19
+        6               2  5 10                                                                              0.00017             1.1            0.19
+        7               2  25 31                                                                             0.00018             1.1            0.2
+        8               2  22 23                                                                             0.00021             1.1            0.19
+        9               2  24 30                                                                             0.00021             1.1            0.19
+       10               2  7 8                                                                               0.00023             1.1            0.2
+       11               3  26 29 34                                                                          0.00024             1.2            0.27
+       12               2  12 20                                                                             0.00028             1.1            0.2
+       13               2  15 21                                                                             0.00031             1.1            0.2
+       14               3  5 9 10                                                                            0.00036             1.1            0.28
+       15               3  0 2 6                                                                             0.00037             1.2            0.29
+       16               3  12 14 20                                                                          0.00057             1.2            0.27
+       17               5  0 1 2 3 6                                                                         0.00071             1.3            0.42
+       18               3  19 22 23                                                                          0.00074             1.2            0.27
+       19               4  25 27 31 33                                                                       0.00089             1.2            0.35
+       20               5  24 26 29 30 34                                                                    0.0011              1.3            0.41
+       21               2  28 32                                                                             0.0011              1.1            0.2
+       22               7  0 1 2 3 6 7 8                                                                     0.0016              1.5            0.53
+       23               9  24 25 26 27 29 30 31 33 34                                                        0.0019              1.6            0.6
+       24               3  13 16 17                                                                          0.0021              1.2            0.27
+       25              10  0 1 2 3 5 6 7 8 9 10                                                              0.0024              1.7            0.65
+       26               5  15 19 21 22 23                                                                    0.0025              1.3            0.42
+       27               6  12 13 14 16 17 20                                                                 0.0036              1.4            0.47
+       28              11  0 1 2 3 4 5 6 7 8 9 10                                                            0.004               1.7            0.69
+       29              12  0 1 2 3 4 5 6 7 8 9 10 11                                                         0.0054              1.8            0.72
+       30              11  24 25 26 27 28 29 30 31 32 33 34                                                  0.0058              1.7            0.68
+       31              12  24 25 26 27 28 29 30 31 32 33 34 35                                               0.0069              1.8            0.71
+       32               7  12 13 14 16 17 18 20                                                              0.0072              1.4            0.52
+       33              12  12 13 14 15 16 17 18 19 20 21 22 23                                               0.02                1.8            0.71
+       34              24  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23                     0.13                2.8            0.91
+       35              36  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29   0.18                4              0.97
+                           30 31 32 33 34 35
+=========  ==============  ===============================================================================  ========  ==============  ==============
+
+Evaluating Significant Clusters from Cosine-Angle Coordinates:
+Using OPTICS Algorithm (M. Ankerst et al, 1999, ACM SIGMOD)
+Optimising Minimum Samples using OPTUNA.....
+Locating best region using random sampling...
+---Trial 0---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 6.
+---Trial 1---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 16. Setting score to -1.
+---Trial 2---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 35. Setting score to -1.
+---Trial 3---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 28. Setting score to -1.
+---Trial 4---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 24. Setting score to -1.
+---Trial 5---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 9.
+---Trial 6---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 9.
+---Trial 7---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 6.
+---Trial 8---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 32. Setting score to -1.
+---Trial 9---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 24. Setting score to -1.
+---Trial 10---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 27. Setting score to -1.
+---Trial 11---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 5.
+---Trial 12---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 36. Setting score to -1.
+---Trial 13---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 31. Setting score to -1.
+---Trial 14---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 11.
+---Trial 15---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 10.
+---Trial 16---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 10.
+---Trial 17---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 14. Setting score to -1.
+---Trial 18---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 21. Setting score to -1.
+---Trial 19---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 18. Setting score to -1.
+Switching to Bayesian Optimisation...
+---Trial 20---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 14. Setting score to -1.
+---Trial 21---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 8.
+---Trial 22---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 7.
+---Trial 23---
+Cluster labels for solution:
+Noise: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.653 (Silhouette Score: 0.808) using 'min_samples': 12.
+---Trial 24---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 8.
+---Trial 25---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 5.
+---Trial 26---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 13. Setting score to -1.
+---Trial 27---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 17. Setting score to -1.
+---Trial 28---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 9.
+---Trial 29---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 15. Setting score to -1.
+---Trial 30---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 19. Setting score to -1.
+---Trial 31---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 6.
+---Trial 32---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 7.
+---Trial 33---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 11.
+---Trial 34---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 5.
+---Trial 35---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 9.
+---Trial 36---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 7.
+---Trial 37---
+Cluster labels for solution:
+Noise: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.653 (Silhouette Score: 0.808) using 'min_samples': 12.
+---Trial 38---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 9.
+---Trial 39---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 5.
+---Trial 40---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 16. Setting score to -1.
+---Trial 41---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 6.
+---Trial 42---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 8.
+---Trial 43---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 10.
+---Trial 44---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 5.
+---Trial 45---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 11.
+---Trial 46---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 7.
+---Trial 47---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 9.
+---Trial 48---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Silhouette Score cannot be calculated as only one cluster present with min_samples 13. Setting score to -1.
+---Trial 49---
+Cluster labels for solution:
+Cluster 0: 0 1 2 3 4 5 6 7 8 9 10 11
+Cluster 1: 12 13 14 15 16 17 18 19 20 21 22 23
+Cluster 2: 24 25 26 27 28 29 30 31 32 33 34 35
+Score (with noise): 0.754 (Silhouette Score: 0.754) using 'min_samples': 6.
+---Optimisation Summary---
+Best trial was 0 with overall score of 0.754 (Silhouette Score 0.754)
+Set Minimum Samples to 6
+OPTICS identified 3 clusters and 0 outlier datasets.
+Silhouette score of OPTICS result is 0.7541.
+Cluster 0
+  Number of datasets: 12
+  Completeness: 72.2 %
+  Multiplicity: 1.80
+  Datasets:0,1,2,3,4,5,6,7,8,9,10,11
+Cluster 1
+  Number of datasets: 12
+  Completeness: 71.3 %
+  Multiplicity: 1.78
+  Datasets:12,13,14,15,16,17,18,19,20,21,22,23
+Cluster 2
+  Number of datasets: 12
+  Completeness: 71.0 %
+  Multiplicity: 1.81
+  Datasets:24,25,26,27,28,29,30,31,32,33,34,35

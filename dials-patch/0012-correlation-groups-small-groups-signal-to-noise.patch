@@ -1,0 +1,158 @@
+From 368987aa6e6867878cf26c1afbe67275077e2250 Mon Sep 17 00:00:00 2001
+From: Philipp Bogdan <174341097+philippbogdan@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 16:47:08 +0100
+Subject: [PATCH 12/13] correlation groups: small_groups by signal to noise
+ (defaults min_signal_to_noise 30, z 2, min_coherence 0.01, min_ratio 1.5;
+ max_se optional): a group smaller than min_group_size is reported when its
+ coherence stands 30 standard errors out of the counting noise;
+ small_group_admitted; test
+
+---
+ src/dials/algorithms/correlation/analysis.py | 27 +++++++++------
+ src/dials/algorithms/correlation/groups.py   | 15 ++++++++
+ tests/algorithms/correlation/test_groups.py  | 36 ++++++++++++++++++++
+ 3 files changed, 67 insertions(+), 11 deletions(-)
+
+diff --git a/src/dials/algorithms/correlation/analysis.py b/src/dials/algorithms/correlation/analysis.py
+index 6789eda..6117b55 100644
+--- a/src/dials/algorithms/correlation/analysis.py
++++ b/src/dials/algorithms/correlation/analysis.py
+@@ -91,19 +91,23 @@
+       .type = int(value_min=0)
+       .help = "Data sets with fewer correlations that have an error are not judged."
+     small_groups {
+-      max_se = 0.002
++      min_signal_to_noise = 30
+         .type = float(value_min=0)
+-        .help = "A group smaller than min_group_size is reported when its coherence is measured"
+-                "this precisely (standard error over the counting-noise replicates) ..."
++        .help = "A group smaller than min_group_size is reported when its coherence is at least"
++                "this many standard errors (over the counting-noise replicates) ..."
++      max_se = None
++        .type = float(value_min=0)
++        .optional = True
++        .help = "... with a standard error of at most max_se, if given (0: never) ..."
+       z = 2
+         .type = float(value_min=0)
+         .help = "... and stands this many standard errors above min_coherence * 2 / k ..."
+-      min_coherence = 0.04
++      min_coherence = 0.01
+         .type = float(value_min=0)
+-      min_ratio = 2
++      min_ratio = 1.5
+         .type = float(value_min=0)
+         .help = "... and is this many times more coherent than the strongest structure of its"
+-                "size inside the rest. max_se = 0: never."
++                "size inside the rest."
+     }
+     min_group_size = 5
+       .type = int(value_min=2)
+@@ -898,6 +902,7 @@ def find_small_groups(self):
+             apply_min_group_size,
+             group_evidence,
+             combine_groups,
++            small_group_admitted,
+             dense_from_target,
+             noise_replicates,
+             take_out_groups,
+@@ -942,12 +947,12 @@ def find_small_groups(self):
+         analytic = noise_replicates(y, v, m, rij, model="analytic", n_replicates=gp.n_replicates, seed=gp.seed)
+ 
+         def precise(group):
+-            if sg.max_se <= 0:
+-                return False
+             coherence, se, d = group_evidence(rij, wij, analytic, group)
+-            k = len(group)
+-            return bool(se <= sg.max_se and coherence - sg.z * se >= sg.min_coherence * 2 / k
+-                        and (d <= 0 or coherence / d >= sg.min_ratio))
++            return small_group_admitted(
++                coherence, se, d, len(group),
++                min_signal_to_noise=sg.min_signal_to_noise, z=sg.z,
++                min_coherence=sg.min_coherence, min_ratio=sg.min_ratio, max_se=sg.max_se,
++            )
+ 
+         groups = apply_min_group_size(groups, gp.min_group_size, keep=precise)
+         detection = runs[0]
+diff --git a/src/dials/algorithms/correlation/groups.py b/src/dials/algorithms/correlation/groups.py
+index 409345c..1308997 100644
+--- a/src/dials/algorithms/correlation/groups.py
++++ b/src/dials/algorithms/correlation/groups.py
+@@ -545,6 +545,21 @@ def group_evidence(r, w, deltas, members):
+     return coherence, se, decoy(e, [rest], len(members))
+ 
+ 
++def small_group_admitted(coherence, se, decoy, k, min_signal_to_noise=30, z=2, min_coherence=0.01,
++                         min_ratio=1.5, max_se=None):
++    """Whether a group of k data sets smaller than the minimum group size is reported nonetheless
++    (group_evidence gives coherence, se and decoy): its coherence stands min_signal_to_noise standard
++    errors out of the counting noise, z standard errors above min_coherence * 2 / k, and min_ratio
++    times above the strongest structure of its size inside the rest. Within-sample structure of a few
++    crystals can be as coherent as a group of another population, but is rarely that far out of its
++    own noise. max_se, if given, also bounds the standard error (0: never)."""
++    if not (np.isfinite(se) and se > 0) or (max_se is not None and se > max_se):
++        return False
++    return bool(coherence >= min_signal_to_noise * se
++                and coherence - z * se >= min_coherence * 2 / k
++                and (decoy <= 0 or coherence / decoy >= min_ratio))
++
++
+ def apply_min_group_size(groups, min_group_size, keep=None):
+     """The populations with every group smaller than min_group_size returned to the background (the
+     largest population), largest first; `keep(group)` can admit a smaller group nonetheless."""
+diff --git a/tests/algorithms/correlation/test_groups.py b/tests/algorithms/correlation/test_groups.py
+index 26a4252..36cdb9c 100644
+--- a/tests/algorithms/correlation/test_groups.py
++++ b/tests/algorithms/correlation/test_groups.py
+@@ -18,6 +18,7 @@
+     combine_groups,
+     noise_replicates,
+     rank1_fit,
++    small_group_admitted,
+     take_out_groups,
+     weighted_cc_matrix,
+ )
+@@ -362,6 +363,41 @@ def keep(g, max_se):
+     assert [len(g) for g in apply_min_group_size(groups, 5, keep=lambda g: keep(g, 0.0))] == [14]
+ 
+ 
++def test_small_groups_need_signal_to_noise():
++    # a pair of another population is kept below the minimum group size when its coherence stands
++    # many standard errors out of the counting noise (2000 reflections); the same kind of pair over
++    # 60 reflections, as coherent but measured imprecisely, returns to the background population
++    def pair(nref):
++        y, v, m = synthetic([12, 2], shift=0.4, nref=nref, seed=3)
++        r = weighted_cc_matrix(y, v, m)
++        w = np.ones_like(r)
++        np.fill_diagonal(w, 0)
++        deltas = noise_replicates(y, v, m, r, model="analytic", n_replicates=60, seed=1)
++        groups = GroupDetection(r, w, deltas).run()
++        assert sorted(len(g) for g in groups) == [2, 12]
++
++        def keep(g):
++            return small_group_admitted(*group_evidence(r, w, deltas, g), len(g))
++
++        return group_evidence(r, w, deltas, np.array([12, 13])), apply_min_group_size(groups, 5, keep=keep)
++
++    (coherence, se, _), out = pair(2000)
++    assert coherence > 30 * se
++    assert [len(g) for g in out] == [12, 2]
++    (coherence, se, _), out = pair(60)
++    assert coherence - 2 * se > 0.1 and coherence < 30 * se
++    assert [len(g) for g in out] == [14]
++    # the conditions one by one; max_se bounds the standard error (0: never)
++    assert small_group_admitted(0.03, 0.0005, 0.005, 2)
++    assert not small_group_admitted(0.03, 0.002, 0.005, 2)  # 15 standard errors
++    assert not small_group_admitted(0.03, 0.0005, 0.025, 2)  # 1.2 times the rest's structure
++    assert not small_group_admitted(0.008, 0.0001, -0.001, 2)  # below 0.01 + 2 se
++    assert not small_group_admitted(0.03, np.inf, 0.005, 2)
++    assert not small_group_admitted(0.03, 0.0005, 0.005, 2, max_se=0)
++    assert small_group_admitted(0.05, 0.0015, 0.01, 2, min_signal_to_noise=0, min_coherence=0.04,
++                                min_ratio=2, max_se=0.002)  # v8's rule
++
++
+ def test_combine_groups():
+     # the first run reports a pair; the second a triple elsewhere and a group overlapping the
+     # pair: the triple is added, the overlapping group is not, the rest is the background
+-- 
+2.54.0 (Apple Git-157)
+

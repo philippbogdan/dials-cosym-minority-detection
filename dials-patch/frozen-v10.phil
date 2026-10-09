@@ -1,0 +1,18 @@
+# v10 (PREREGISTRATION.md amendment 23; dials-patch/0001-0014, PATCH_MAX=14): v9, the take-out decided
+# on all groups before the minimum group size.
+significant_clusters.find_small_groups = True
+significant_clusters.groups.significance = 0.01
+significant_clusters.groups.separation_ratio = 3.5
+significant_clusters.groups.min_population = 5
+significant_clusters.groups.min_coherence = 0.05
+significant_clusters.groups.pair_significance = 0.001
+significant_clusters.groups.min_usable_pairs = 3
+significant_clusters.groups.min_group_size = 5
+significant_clusters.groups.small_groups.min_signal_to_noise = 30
+significant_clusters.groups.small_groups.max_se = None
+significant_clusters.groups.small_groups.z = 2
+significant_clusters.groups.small_groups.min_coherence = 0.01
+significant_clusters.groups.small_groups.min_ratio = 1.5
+significant_clusters.groups.noise_model = both
+significant_clusters.groups.n_replicates = 100
+significant_clusters.groups.seed = 0

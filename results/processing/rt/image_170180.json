@@ -1,0 +1,36 @@
+{
+ "collection": "rt",
+ "crystal": "image_170180",
+ "species": "bovine",
+ "dials_version": "DIALS 3.30",
+ "n_images": 600,
+ "oscillation": [
+  -29.999999999999996,
+  0.10000000149011545
+ ],
+ "image_range": [
+  1,
+  600
+ ],
+ "unit_cell": [
+  67.87476280509394,
+  67.89562229652475,
+  67.88593136438008,
+  109.46347241122075,
+  109.46755086653921,
+  109.47130094399273
+ ],
+ "space_group": "P 1",
+ "n_strong": 5644,
+ "n_indexed": 5242,
+ "n_integrated_prf": 57549,
+ "n_integrated_sum": 57794,
+ "n_reflections": 59382,
+ "wavelength": 0.774904426503892,
+ "index_retry": false,
+ "rmsd_xy_phi": [
+  0.18828,
+  0.23184,
+  0.083973
+ ]
+}

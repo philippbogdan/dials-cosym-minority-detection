@@ -1,0 +1,162 @@
+From b9169b6f3a22068b92131dd5425c63710bdc6118 Mon Sep 17 00:00:00 2001
+From: Philipp Bogdan <174341097+philippbogdan@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 17:44:12 +0100
+Subject: [PATCH] correlation groups: small_groups.precise (default max_se
+ 0.002, z 2, min_coherence 0.04, min_ratio 2): a group smaller than
+ min_group_size is also reported when precisely measured and strong;
+ admitted_by_any; test
+
+---
+ src/dials/algorithms/correlation/analysis.py | 51 ++++++++++++++------
+ src/dials/algorithms/correlation/groups.py   |  6 +++
+ tests/algorithms/correlation/test_groups.py  | 29 +++++++++++
+ 3 files changed, 72 insertions(+), 14 deletions(-)
+
+diff --git a/src/dials/algorithms/correlation/analysis.py b/src/dials/algorithms/correlation/analysis.py
+index aafb650..607fffd 100644
+--- a/src/dials/algorithms/correlation/analysis.py
++++ b/src/dials/algorithms/correlation/analysis.py
+@@ -107,7 +107,23 @@
+       min_ratio = 1.5
+         .type = float(value_min=0)
+         .help = "... and is this many times more coherent than the strongest structure of its"
+-                "size inside the rest."
++                "size inside the rest; or when it meets the conditions of precise."
++      precise {
++        max_se = 0.002
++          .type = float(value_min=0)
++          .optional = True
++          .help = "A group smaller than min_group_size is also reported when its coherence is"
++                  "measured this precisely (standard error; 0: not this way) ..."
++        z = 2
++          .type = float(value_min=0)
++          .help = "... and stands this many standard errors above min_coherence * 2 / k ..."
++        min_coherence = 0.04
++          .type = float(value_min=0)
++        min_ratio = 2
++          .type = float(value_min=0)
++          .help = "... and is this many times more coherent than the strongest structure of"
++                  "its size inside the rest."
++      }
+     }
+     min_group_size = 5
+       .type = int(value_min=2)
+@@ -901,11 +917,11 @@ def find_small_groups(self):
+         """
+         from dials.algorithms.correlation.groups import (
+             GroupDetection,
++            admitted_by_any,
+             combine_groups,
+             dense_from_target,
+             group_evidence,
+             noise_replicates,
+-            small_group_admitted,
+             take_out_groups,
+         )
+ 
+@@ -955,19 +971,26 @@ def find_small_groups(self):
+             y, v, m, rij, model="analytic", n_replicates=gp.n_replicates, seed=gp.seed
+         )
+ 
++        conditions = [
++            {
++                "min_signal_to_noise": sg.min_signal_to_noise,
++                "z": sg.z,
++                "min_coherence": sg.min_coherence,
++                "min_ratio": sg.min_ratio,
++                "max_se": sg.max_se,
++            },
++            {
++                "min_signal_to_noise": 0,
++                "z": sg.precise.z,
++                "min_coherence": sg.precise.min_coherence,
++                "min_ratio": sg.precise.min_ratio,
++                "max_se": sg.precise.max_se,
++            },
++        ]
++
+         def precise(group):
+-            coherence, se, d = group_evidence(rij, wij, analytic, group)
+-            return small_group_admitted(
+-                coherence,
+-                se,
+-                d,
+-                len(group),
+-                min_signal_to_noise=sg.min_signal_to_noise,
+-                z=sg.z,
+-                min_coherence=sg.min_coherence,
+-                min_ratio=sg.min_ratio,
+-                max_se=sg.max_se,
+-            )
++            evidence = group_evidence(rij, wij, analytic, group)
++            return admitted_by_any(*evidence, len(group), conditions)
+ 
+         for step in [s for d in runs for s in d.log]:
+             logger.info(
+diff --git a/src/dials/algorithms/correlation/groups.py b/src/dials/algorithms/correlation/groups.py
+index 8b06d79..c3e76ba 100644
+--- a/src/dials/algorithms/correlation/groups.py
++++ b/src/dials/algorithms/correlation/groups.py
+@@ -604,6 +604,12 @@ def small_group_admitted(
+     )
+ 
+ 
++def admitted_by_any(coherence, se, decoy, k, conditions):
++    """Whether any of several sets of small_group_admitted's conditions admits a group: a small group
++    can stand out by how far it is out of its own noise, or by being precisely measured and strong."""
++    return any(small_group_admitted(coherence, se, decoy, k, **c) for c in conditions)
++
++
+ def combine_groups(first, second, n):
+     """Populations from two detector runs on the same n data sets (e.g. the two noise
+     models): the groups the first reports (every group but its background population, the
+diff --git a/tests/algorithms/correlation/test_groups.py b/tests/algorithms/correlation/test_groups.py
+index 2e92aa2..6ae8751 100644
+--- a/tests/algorithms/correlation/test_groups.py
++++ b/tests/algorithms/correlation/test_groups.py
+@@ -9,6 +9,7 @@
+ 
+ from dials.algorithms.correlation.groups import (
+     GroupDetection,
++    admitted_by_any,
+     analytic_replicates,
+     bootstrap_replicates,
+     combine_groups,
+@@ -445,6 +446,34 @@ def keep(g):
+     )  # v8's rule
+ 
+ 
++def test_small_groups_either_condition():
++    # a small group is reported when it stands far out of its own noise or when it is precisely
++    # measured and strong (small_groups and small_groups.precise)
++    far = {
++        "min_signal_to_noise": 30,
++        "z": 2,
++        "min_coherence": 0.01,
++        "min_ratio": 1.5,
++        "max_se": None,
++    }
++    near = {
++        "min_signal_to_noise": 0,
++        "z": 2,
++        "min_coherence": 0.04,
++        "min_ratio": 2,
++        "max_se": 0.002,
++    }
++    both = [far, near]
++    # precise and strong, 25 standard errors out: only the second admits it
++    assert not small_group_admitted(0.045, 0.0018, 0.01, 2, **far)
++    assert admitted_by_any(0.045, 0.0018, 0.01, 2, both)
++    # 82 standard errors out, below the second's floor: only the first admits it
++    assert not small_group_admitted(0.033, 0.0004, 0.004, 2, **near)
++    assert admitted_by_any(0.033, 0.0004, 0.004, 2, both)
++    # neither
++    assert not admitted_by_any(0.03, 0.002, 0.005, 2, both)
++
++
+ def test_combine_groups():
+     # the first run reports a pair; the second a triple elsewhere and a group overlapping the
+     # pair: the triple is added, the overlapping group is not, the rest is the background
+-- 
+2.54.0 (Apple Git-157)
+

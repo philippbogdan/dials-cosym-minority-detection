@@ -1,0 +1,470 @@
+From 318c37d3f21b6bf4e27aa744afdc9d8831ee6322 Mon Sep 17 00:00:00 2001
+From: Philipp Bogdan <174341097+philippbogdan@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 16:47:46 +0100
+Subject: [PATCH 13/13] correlation groups: ruff check and ruff format (DIALS's
+ pre-commit); no change in behaviour
+
+---
+ src/dials/algorithms/correlation/analysis.py |  35 +++++--
+ src/dials/algorithms/correlation/groups.py   |  77 +++++++++++---
+ tests/algorithms/correlation/test_groups.py  | 103 ++++++++++++++-----
+ 3 files changed, 162 insertions(+), 53 deletions(-)
+
+diff --git a/src/dials/algorithms/correlation/analysis.py b/src/dials/algorithms/correlation/analysis.py
+index 6117b55..5d3c102 100644
+--- a/src/dials/algorithms/correlation/analysis.py
++++ b/src/dials/algorithms/correlation/analysis.py
+@@ -874,7 +874,9 @@ def cluster_cosine_coords(self):
+         if self.params.significant_clusters.find_small_groups:
+             self.find_small_groups()
+ 
+-        self.optics_reachability_labels = np.asarray(self.cluster_labels)[optics_model.ordering_]
++        self.optics_reachability_labels = np.asarray(self.cluster_labels)[
++            optics_model.ordering_
++        ]
+ 
+         cluster_dict = self._prep_optics_for_info()
+ 
+@@ -900,11 +902,11 @@ def find_small_groups(self):
+         from dials.algorithms.correlation.groups import (
+             GroupDetection,
+             apply_min_group_size,
+-            group_evidence,
+             combine_groups,
+-            small_group_admitted,
+             dense_from_target,
++            group_evidence,
+             noise_replicates,
++            small_group_admitted,
+             take_out_groups,
+         )
+ 
+@@ -921,7 +923,9 @@ def find_small_groups(self):
+         rij = np.array(target.rij_matrix, dtype=np.float64)
+         np.fill_diagonal(rij, 0.0)
+         wij = np.array(target.wij_matrix, dtype=np.float64)
+-        models = ("analytic", "bootstrap") if gp.noise_model == "both" else (gp.noise_model,)
++        models = (
++            ("analytic", "bootstrap") if gp.noise_model == "both" else (gp.noise_model,)
++        )
+         runs = []
+         for model in models:
+             deltas = noise_replicates(
+@@ -942,20 +946,31 @@ def find_small_groups(self):
+                 )
+             )
+         found = [d.run() for d in runs]
+-        groups = found[0] if len(found) == 1 else combine_groups(found[0], found[1], len(rij))
++        groups = (
++            found[0]
++            if len(found) == 1
++            else combine_groups(found[0], found[1], len(rij))
++        )
+         sg = gp.small_groups
+-        analytic = noise_replicates(y, v, m, rij, model="analytic", n_replicates=gp.n_replicates, seed=gp.seed)
++        analytic = noise_replicates(
++            y, v, m, rij, model="analytic", n_replicates=gp.n_replicates, seed=gp.seed
++        )
+ 
+         def precise(group):
+             coherence, se, d = group_evidence(rij, wij, analytic, group)
+             return small_group_admitted(
+-                coherence, se, d, len(group),
+-                min_signal_to_noise=sg.min_signal_to_noise, z=sg.z,
+-                min_coherence=sg.min_coherence, min_ratio=sg.min_ratio, max_se=sg.max_se,
++                coherence,
++                se,
++                d,
++                len(group),
++                min_signal_to_noise=sg.min_signal_to_noise,
++                z=sg.z,
++                min_coherence=sg.min_coherence,
++                min_ratio=sg.min_ratio,
++                max_se=sg.max_se,
+             )
+ 
+         groups = apply_min_group_size(groups, gp.min_group_size, keep=precise)
+-        detection = runs[0]
+         for step in [s for d in runs for s in d.log]:
+             logger.info(
+                 "  %(n)i data sets: candidate group of %(size)i, p = %(p).2g, coherence "
+diff --git a/src/dials/algorithms/correlation/groups.py b/src/dials/algorithms/correlation/groups.py
+index 1308997..215b38d 100644
+--- a/src/dials/algorithms/correlation/groups.py
++++ b/src/dials/algorithms/correlation/groups.py
+@@ -72,7 +72,12 @@ def dense_from_target(target):
+     intensities = np.array(data.data(), dtype=np.float64)
+     sigmas = np.array(data.sigmas(), dtype=np.float64)
+     n = len(target._lattices)
+-    hkl, intensities, sigmas, ids = hkl[eps1], intensities[eps1], sigmas[eps1], ids[eps1]
++    hkl, intensities, sigmas, ids = (
++        hkl[eps1],
++        intensities[eps1],
++        sigmas[eps1],
++        ids[eps1],
++    )
+     key = (hkl[:, 0] * 4096 + hkl[:, 1]) * 4096 + hkl[:, 2]
+     _, col = np.unique(key, return_inverse=True)
+     nref = int(col.max()) + 1 if len(col) else 0
+@@ -132,7 +137,9 @@ def bootstrap_replicates(y, v, m, n_bootstrap=100, seed=0, min_pairs=3, chunk=64
+             c = np.where(mm, 1.0 / (v[a] + v[b]), 0.0)
+         x, z = y[a], y[b]
+         terms = np.stack([c, c * x, c * z, c * x * z, c * x * x, c * z * z])
+-        sums = (terms.reshape(-1, terms.shape[2]) @ wt.T).reshape(6, len(a), n_bootstrap)
++        sums = (terms.reshape(-1, terms.shape[2]) @ wt.T).reshape(
++            6, len(a), n_bootstrap
++        )
+         sw, swx, swy, swxy, swxx, swyy = sums.transpose(0, 2, 1)
+         count = drawn @ mm.T.astype(np.float64)
+         with np.errstate(divide="ignore", invalid="ignore"):
+@@ -204,7 +211,9 @@ def rank1_fit(r, w, iters=5000, tol=1e-12):
+     np.fill_diagonal(w, 0.0)
+     wsum = w.sum(1)
+     with np.errstate(divide="ignore", invalid="ignore"):
+-        rho = np.sqrt(np.clip(np.where(wsum > 0, (w * r).sum(1) / wsum, 0.0), 1e-6, None))
++        rho = np.sqrt(
++            np.clip(np.where(wsum > 0, (w * r).sum(1) / wsum, 0.0), 1e-6, None)
++        )
+         for _ in range(iters):
+             num = (w * r * rho[None, :]).sum(1)
+             den = (w * rho[None, :] ** 2).sum(1)
+@@ -305,7 +314,9 @@ def gaps(z):
+     p = float(-np.expm1(-np.exp(-(t - loc) / beta)))
+     k = int(np.argmax(t_obs)) + 2
+     members = np.sort(order[int(np.nanargmax(g[:, k])), :k])
+-    return Scan(p=p, statistic=t, members=members, residuals=e, rho=rho, se=se, valid=valid)
++    return Scan(
++        p=p, statistic=t, members=members, residuals=e, rho=rho, se=se, valid=valid
++    )
+ 
+ 
+ def _mean_within(e, members):
+@@ -321,12 +332,18 @@ def _affinity(r, a, b):
+     """Mean correlation between sets a and b over the geometric mean of their mean internal
+     correlations (data quality cancels)."""
+     between = np.nanmean(r[np.ix_(a, b)])
+-    inside = [np.nanmean(r[np.ix_(x, x)][np.triu_indices(len(x), 1)]) if len(x) > 1 else np.nan
+-              for x in (a, b)]
++    inside = [
++        np.nanmean(r[np.ix_(x, x)][np.triu_indices(len(x), 1)])
++        if len(x) > 1
++        else np.nan
++        for x in (a, b)
++    ]
+     inside = [v for v in inside if np.isfinite(v) and v > 0]
+     if not np.isfinite(between) or not inside:
+         return -np.inf
+-    return float(between / np.sqrt(np.prod(inside) if len(inside) == 2 else inside[0] ** 2))
++    return float(
++        between / np.sqrt(np.prod(inside) if len(inside) == 2 else inside[0] ** 2)
++    )
+ 
+ 
+ def most_coherent_subset(e, pool, k, exhaustive=200_000):
+@@ -474,8 +491,17 @@ def _analyse(self, idx, depth):
+             and s.p >= self.pair_significance
+         ):
+             ok = False
+-        self.log.append(dict(depth=depth, n=n, p=s.p, size=len(members), coherence=coherence,
+-                             decoy=strongest, accepted=bool(ok)))
++        self.log.append(
++            {
++                "depth": depth,
++                "n": n,
++                "p": s.p,
++                "size": len(members),
++                "coherence": coherence,
++                "decoy": strongest,
++                "accepted": bool(ok),
++            }
++        )
+         if ok:
+             if len(members) >= 2 + self.min_population:
+                 member_groups = self._analyse(idx[members], depth + 1)
+@@ -545,8 +571,17 @@ def group_evidence(r, w, deltas, members):
+     return coherence, se, decoy(e, [rest], len(members))
+ 
+ 
+-def small_group_admitted(coherence, se, decoy, k, min_signal_to_noise=30, z=2, min_coherence=0.01,
+-                         min_ratio=1.5, max_se=None):
++def small_group_admitted(
++    coherence,
++    se,
++    decoy,
++    k,
++    min_signal_to_noise=30,
++    z=2,
++    min_coherence=0.01,
++    min_ratio=1.5,
++    max_se=None,
++):
+     """Whether a group of k data sets smaller than the minimum group size is reported nonetheless
+     (group_evidence gives coherence, se and decoy): its coherence stands min_signal_to_noise standard
+     errors out of the counting noise, z standard errors above min_coherence * 2 / k, and min_ratio
+@@ -555,9 +590,11 @@ def small_group_admitted(coherence, se, decoy, k, min_signal_to_noise=30, z=2, m
+     own noise. max_se, if given, also bounds the standard error (0: never)."""
+     if not (np.isfinite(se) and se > 0) or (max_se is not None and se > max_se):
+         return False
+-    return bool(coherence >= min_signal_to_noise * se
+-                and coherence - z * se >= min_coherence * 2 / k
+-                and (decoy <= 0 or coherence / decoy >= min_ratio))
++    return bool(
++        coherence >= min_signal_to_noise * se
++        and coherence - z * se >= min_coherence * 2 / k
++        and (decoy <= 0 or coherence / decoy >= min_ratio)
++    )
+ 
+ 
+ def apply_min_group_size(groups, min_group_size, keep=None):
+@@ -566,8 +603,16 @@ def apply_min_group_size(groups, min_group_size, keep=None):
+     groups = sorted((np.asarray(g) for g in groups), key=len, reverse=True)
+     if len(groups) <= 1:
+         return groups
+-    kept = [g for g in groups[1:] if len(g) >= min_group_size or (keep is not None and keep(g))]
+-    small = [g for g in groups[1:] if not (len(g) >= min_group_size or (keep is not None and keep(g)))]
++    kept = [
++        g
++        for g in groups[1:]
++        if len(g) >= min_group_size or (keep is not None and keep(g))
++    ]
++    small = [
++        g
++        for g in groups[1:]
++        if not (len(g) >= min_group_size or (keep is not None and keep(g)))
++    ]
+     background = np.sort(np.concatenate([groups[0]] + small)) if small else groups[0]
+     return sorted([background] + kept, key=len, reverse=True)
+ 
+diff --git a/tests/algorithms/correlation/test_groups.py b/tests/algorithms/correlation/test_groups.py
+index 36cdb9c..36cad4c 100644
+--- a/tests/algorithms/correlation/test_groups.py
++++ b/tests/algorithms/correlation/test_groups.py
+@@ -11,11 +11,11 @@
+     GroupDetection,
+     analytic_replicates,
+     apply_min_group_size,
+-    group_evidence,
+     bootstrap_replicates,
++    combine_groups,
+     dense_from_target,
+     effective_sizes,
+-    combine_groups,
++    group_evidence,
+     noise_replicates,
+     rank1_fit,
+     small_group_admitted,
+@@ -51,7 +51,9 @@ def detect(y, v, m, noise_model="analytic", n_replicates=60, **kwargs):
+     r = weighted_cc_matrix(y, v, m)
+     w = np.ones_like(r)
+     np.fill_diagonal(w, 0)
+-    deltas = noise_replicates(y, v, m, r, model=noise_model, n_replicates=n_replicates, seed=1)
++    deltas = noise_replicates(
++        y, v, m, r, model=noise_model, n_replicates=n_replicates, seed=1
++    )
+     groups = GroupDetection(r, w, deltas, **kwargs).run()
+     return sorted(sorted(int(i) for i in g) for g in groups)
+ 
+@@ -67,7 +69,10 @@ def test_dense_correlations_match_cosym(space_group):
+         ids = np.concatenate([ids, np.full(d.size(), i)])
+     lattice = intensities.space_group().build_derived_patterson_group()
+     t = cosym_target.Target(
+-        intensities, ids.astype(int), weights="count", lattice_group=lattice,
++        intensities,
++        ids.astype(int),
++        weights="count",
++        lattice_group=lattice,
+         cc_weights="sigma",
+     )
+     y, v, m = dense_from_target(t)
+@@ -91,7 +96,11 @@ def test_two_data_sets_set_apart_are_found():
+ 
+ def test_three_populations_are_separated():
+     y, v, m = synthetic([8, 8, 8], shift=0.4, seed=4)
+-    assert detect(y, v, m) == [list(range(0, 8)), list(range(8, 16)), list(range(16, 24))]
++    assert detect(y, v, m) == [
++        list(range(0, 8)),
++        list(range(8, 16)),
++        list(range(16, 24)),
++    ]
+ 
+ 
+ @pytest.mark.parametrize("seed", [5, 6, 7])
+@@ -117,7 +126,9 @@ def test_strong_continuous_variation_by_separation_alone(seed):
+     # reported: a known limit of the separation criterion for continua this strong (stronger
+     # than the variation inside one species of the insulin data at full data, <= 0.016)
+     y, v, m = synthetic([14], heterogeneity=0.15, seed=seed)
+-    assert detect(y, v, m, noise_model="bootstrap", min_coherence=None) == [list(range(14))]
++    assert detect(y, v, m, noise_model="bootstrap", min_coherence=None) == [
++        list(range(14))
++    ]
+ 
+ 
+ def varying_majority_and_pair(minority_shift, heterogeneity=0.1, seed=11, n_minority=2):
+@@ -166,16 +177,23 @@ def test_find_small_groups_in_correlation_matrix(dials_data, run_in_tmp_path):
+         assign_unique_identifiers,
+         parse_multiple_datasets,
+     )
+-    from dials.util.options import ArgumentParser, reflections_and_experiments_from_files
++    from dials.util.options import (
++        ArgumentParser,
++        reflections_and_experiments_from_files,
++    )
+ 
+     mcp = dials_data("vmxi_proteinase_k_sweeps", pathlib=True)
+     args = [str(mcp / f"experiments_{i}.expt") for i in range(4)]
+     args += [str(mcp / f"reflections_{i}.refl") for i in range(4)]
+     parser = ArgumentParser(
+-        phil=phil_scope, read_reflections=True, read_experiments=True, check_format=False
++        phil=phil_scope,
++        read_reflections=True,
++        read_experiments=True,
++        check_format=False,
+     )
+     params, _ = parser.parse_args(
+-        args=args + ["significant_clusters.find_small_groups=True"], show_diff_phil=False
++        args=args + ["significant_clusters.find_small_groups=True"],
++        show_diff_phil=False,
+     )
+     reflections, experiments = reflections_and_experiments_from_files(
+         params.input.reflections, params.input.experiments
+@@ -185,9 +203,11 @@ def test_find_small_groups_in_correlation_matrix(dials_data, run_in_tmp_path):
+     matrices = CorrelationMatrix(experiments, reflections, params)
+     matrices.calculate_matrices()
+     # four data sets of one sample: no group is taken out of the OPTICS result
+-    assert sum(len(c.labels) for c in matrices.significant_clusters) + len(
+-        matrices.outliers
+-    ) == 4
++    assert (
++        sum(len(c.labels) for c in matrices.significant_clusters)
++        + len(matrices.outliers)
++        == 4
++    )
+     assert len(matrices.significant_clusters) <= 1
+     matrices.convert_to_html_json()
+ 
+@@ -204,7 +224,10 @@ def test_groups_taken_out_of_a_single_optics_cluster(
+         assign_unique_identifiers,
+         parse_multiple_datasets,
+     )
+-    from dials.util.options import ArgumentParser, reflections_and_experiments_from_files
++    from dials.util.options import (
++        ArgumentParser,
++        reflections_and_experiments_from_files,
++    )
+ 
+     monkeypatch.setattr(
+         groups_module,
+@@ -215,7 +238,10 @@ def test_groups_taken_out_of_a_single_optics_cluster(
+     args = [str(mcp / f"experiments_{i}.expt") for i in range(4)]
+     args += [str(mcp / f"reflections_{i}.refl") for i in range(4)]
+     parser = ArgumentParser(
+-        phil=phil_scope, read_reflections=True, read_experiments=True, check_format=False
++        phil=phil_scope,
++        read_reflections=True,
++        read_experiments=True,
++        check_format=False,
+     )
+     params, _ = parser.parse_args(
+         args=args
+@@ -260,7 +286,10 @@ def test_effective_sizes_are_cosyms_weights():
+         ids = np.concatenate([ids, np.full(d.size(), i)])
+     lattice = intensities.space_group().build_derived_patterson_group()
+     t = cosym_target.Target(
+-        intensities, ids.astype(int), weights="count", lattice_group=lattice,
++        intensities,
++        ids.astype(int),
++        weights="count",
++        lattice_group=lattice,
+         cc_weights="sigma",
+     )
+     n_eff = effective_sizes(*dense_from_target(t))
+@@ -270,7 +299,6 @@ def test_effective_sizes_are_cosyms_weights():
+ 
+ 
+ def test_analytic_noise_is_the_error_of_fishers_z():
+-    rng = np.random.default_rng(2)
+     r = np.full((6, 6), 0.9)
+     np.fill_diagonal(r, 0)
+     n_eff = np.full((6, 6), 103.0)
+@@ -311,7 +339,9 @@ def test_data_sets_without_usable_correlations_are_not_judged():
+ def test_a_pair_needs_pair_significance():
+     # a pair just significant at 0.01 is not reported when pairs need 0.001
+     y, v, m = synthetic([12, 2], shift=0.4, seed=3)
+-    assert detect(y, v, m, pair_significance=1e-300, significance=1.0) == [list(range(14))]
++    assert detect(y, v, m, pair_significance=1e-300, significance=1.0) == [
++        list(range(14))
++    ]
+ 
+ 
+ def test_take_out_groups():
+@@ -359,8 +389,12 @@ def keep(g, max_se):
+         c, s, dd = group_evidence(r, w, deltas, g)
+         return s <= max_se and c >= 0.04 and (dd <= 0 or c / dd >= 2)
+ 
+-    assert [len(g) for g in apply_min_group_size(groups, 5, keep=lambda g: keep(g, 1.0))] == [12, 2]
+-    assert [len(g) for g in apply_min_group_size(groups, 5, keep=lambda g: keep(g, 0.0))] == [14]
++    assert [
++        len(g) for g in apply_min_group_size(groups, 5, keep=lambda g: keep(g, 1.0))
++    ] == [12, 2]
++    assert [
++        len(g) for g in apply_min_group_size(groups, 5, keep=lambda g: keep(g, 0.0))
++    ] == [14]
+ 
+ 
+ def test_small_groups_need_signal_to_noise():
+@@ -379,7 +413,9 @@ def pair(nref):
+         def keep(g):
+             return small_group_admitted(*group_evidence(r, w, deltas, g), len(g))
+ 
+-        return group_evidence(r, w, deltas, np.array([12, 13])), apply_min_group_size(groups, 5, keep=keep)
++        return group_evidence(r, w, deltas, np.array([12, 13])), apply_min_group_size(
++            groups, 5, keep=keep
++        )
+ 
+     (coherence, se, _), out = pair(2000)
+     assert coherence > 30 * se
+@@ -390,12 +426,22 @@ def keep(g):
+     # the conditions one by one; max_se bounds the standard error (0: never)
+     assert small_group_admitted(0.03, 0.0005, 0.005, 2)
+     assert not small_group_admitted(0.03, 0.002, 0.005, 2)  # 15 standard errors
+-    assert not small_group_admitted(0.03, 0.0005, 0.025, 2)  # 1.2 times the rest's structure
++    assert not small_group_admitted(
++        0.03, 0.0005, 0.025, 2
++    )  # 1.2 times the rest's structure
+     assert not small_group_admitted(0.008, 0.0001, -0.001, 2)  # below 0.01 + 2 se
+     assert not small_group_admitted(0.03, np.inf, 0.005, 2)
+     assert not small_group_admitted(0.03, 0.0005, 0.005, 2, max_se=0)
+-    assert small_group_admitted(0.05, 0.0015, 0.01, 2, min_signal_to_noise=0, min_coherence=0.04,
+-                                min_ratio=2, max_se=0.002)  # v8's rule
++    assert small_group_admitted(
++        0.05,
++        0.0015,
++        0.01,
++        2,
++        min_signal_to_noise=0,
++        min_coherence=0.04,
++        min_ratio=2,
++        max_se=0.002,
++    )  # v8's rule
+ 
+ 
+ def test_combine_groups():
+@@ -403,8 +449,11 @@ def test_combine_groups():
+     # pair: the triple is added, the overlapping group is not, the rest is the background
+     first = [list(range(2, 12)), [0, 1]]
+     second = [[0, 1, 2, 3, 4, 5, 9, 10, 11], [6, 7, 8], [1, 2]]
+-    assert sorted(sorted(int(i) for i in g) for g in combine_groups(first, second, 12)) == [
+-        [0, 1], [2, 3, 4, 5, 9, 10, 11], [6, 7, 8]]
++    assert sorted(
++        sorted(int(i) for i in g) for g in combine_groups(first, second, 12)
++    ) == [[0, 1], [2, 3, 4, 5, 9, 10, 11], [6, 7, 8]]
+     # nothing reported by either: one population
+-    assert [sorted(g.tolist()) for g in combine_groups([list(range(6))], [list(range(6))], 6)] == [
+-        list(range(6))]
++    assert [
++        sorted(g.tolist())
++        for g in combine_groups([list(range(6))], [list(range(6))], 6)
++    ] == [list(range(6))]
+-- 
+2.54.0 (Apple Git-157)
+

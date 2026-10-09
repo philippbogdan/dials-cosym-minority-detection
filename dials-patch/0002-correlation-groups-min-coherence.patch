@@ -1,0 +1,243 @@
+From 3fb1c20a5b466231895e87a4697d97fa11f34c28 Mon Sep 17 00:00:00 2001
+From: Philipp Bogdan <174341097+philippbogdan@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 01:55:53 +0100
+Subject: [PATCH 2/2] correlation groups: min_coherence; converged rank-1 fit;
+ merge-back by correlation affinity
+
+- A significant group whose coherence is at least min_coherence (default 0.03, correlation
+  units) is reported even when the population it is separated from has strong internal
+  structure (separation_ratio alone misses a group next to a structured majority).
+- rank1_fit: damped update (the simultaneous update oscillated when reliabilities differ
+  widely and stopped short of convergence).
+- A rejected candidate goes back to the population it correlates with as well as that
+  population's members correlate with each other (residuals sent half of a continuously
+  varying majority to a minority pair).
+- Tests at realistic within-population variation; tests for min_coherence and the merge-back.
+---
+ src/dials/algorithms/correlation/analysis.py | 13 ++++-
+ src/dials/algorithms/correlation/groups.py   | 51 +++++++++++++++-----
+ tests/algorithms/correlation/test_groups.py  | 43 ++++++++++++++---
+ 3 files changed, 86 insertions(+), 21 deletions(-)
+
+diff --git a/src/dials/algorithms/correlation/analysis.py b/src/dials/algorithms/correlation/analysis.py
+index 2cdb802..73a77d4 100644
+--- a/src/dials/algorithms/correlation/analysis.py
++++ b/src/dials/algorithms/correlation/analysis.py
+@@ -62,8 +62,9 @@
+             "at least min_samples >= 5 data sets per cluster): groups down to two data sets"
+             "that are significant against counting noise (measured by a bootstrap over"
+             "reflections) and stand out from the rest by more than the structure inside the"
+-            "rest (see dials.algorithms.correlation.groups). They are taken out of the OPTICS"
+-            "clusters as clusters of their own."
++            "rest, or are coherent beyond min_coherence (see"
++            "dials.algorithms.correlation.groups). They are taken out of the OPTICS clusters"
++            "as clusters of their own."
+   groups {
+     significance = 0.01
+       .type = float(value_min=0, value_max=1)
+@@ -76,6 +77,12 @@
+       .type = int(value_min=2)
+       .help = "Smallest number of data sets in which internal structure can be judged; a group"
+               "is only split from a rest at least this large."
++    min_coherence = 0.03
++      .type = float(value_min=0)
++      .help = "A significant group whose coherence (mean residual of its pairwise correlations"
++              "from a single population) is at least this large is reported whatever the"
++              "structure of the rest. None: judge by separation_ratio alone."
++      .optional = True
+     n_bootstrap = 100
+       .type = int(value_min=10)
+       .help = "Bootstrap replicates over reflections used to measure counting noise."
+@@ -858,6 +865,7 @@ def find_small_groups(self):
+             "\nFinding groups of data sets, down to two: significant against counting noise "
+             f"(bootstrap over reflections, {gp.n_bootstrap} replicates, p < {gp.significance}) "
+             f"and {gp.separation_ratio} times more coherent than the structure inside the rest"
++            f" or coherent beyond {gp.min_coherence}"
+         )
+         y, v, m = dense_from_target(target)
+         deltas = bootstrap_replicates(y, v, m, n_bootstrap=gp.n_bootstrap, seed=gp.seed)
+@@ -870,6 +878,7 @@ def find_small_groups(self):
+             significance=gp.significance,
+             separation_ratio=gp.separation_ratio,
+             min_population=gp.min_population,
++            min_coherence=gp.min_coherence,
+         )
+         groups = sorted(detection.run(), key=len, reverse=True)
+         for step in detection.log:
+diff --git a/src/dials/algorithms/correlation/groups.py b/src/dials/algorithms/correlation/groups.py
+index ed97d6b..3dcfbe6 100644
+--- a/src/dials/algorithms/correlation/groups.py
++++ b/src/dials/algorithms/correlation/groups.py
+@@ -8,11 +8,14 @@
+    weights, the same draw for all data sets, and every sigma-weighted correlation recomputed
+    as cosym computes it); the scan below is calibrated against the same scan on the
+    noise-only replicates; and
+-2. it stands out from the populations it is separated from by more than their own internal
+-   structure: data sets of one population differ too (cell, hydration, dose), and real
+-   sub-populations exist inside one population, so the group's coherence must exceed
+-   ``separation_ratio`` times the coherence of the most coherent subset of the same size
+-   inside each of those populations (its "decoy").
++2. it is a population of its own: it stands out from the populations it is separated from
++   by more than their own internal structure (data sets of one population differ too: cell,
++   hydration, dose; and real sub-populations exist inside one population), that is its
++   coherence exceeds ``separation_ratio`` times the coherence of the most coherent subset of
++   the same size inside each of those populations (its "decoy"); or its coherence is at
++   least ``min_coherence`` (correlation units), a difference too large for the internal
++   structure of one population, which keeps a group visible when the population it is
++   separated from has strong internal structure of its own.
+ 
+ Coherence: residuals of the correlation matrix from a single population (rank-1 fit, as
+ cosym in one dimension); the coherence of a set is the mean residual over its pairs; a
+@@ -112,8 +115,10 @@ def bootstrap_replicates(y, v, m, n_bootstrap=100, seed=0):
+ # ---------------------------------------------------------------------------------------
+ 
+ 
+-def rank1_fit(r, w, iters=500, tol=1e-12):
+-    """Weighted least-squares rank-1 fit (cosym in one dimension), diagonal excluded."""
++def rank1_fit(r, w, iters=5000, tol=1e-12):
++    """Weighted least-squares rank-1 fit (cosym in one dimension), diagonal excluded. Each
++    step moves halfway to every rho_i's least-squares value given the others (the plain
++    simultaneous update oscillates when the rho_i differ widely)."""
+     w = np.array(w, dtype=float)
+     np.fill_diagonal(w, 0.0)
+     wsum = w.sum(1)
+@@ -122,7 +127,7 @@ def rank1_fit(r, w, iters=500, tol=1e-12):
+         for _ in range(iters):
+             num = (w * r * rho[None, :]).sum(1)
+             den = (w * rho[None, :] ** 2).sum(1)
+-            new = np.where(den > 0, num / den, 0.0)
++            new = 0.5 * (np.where(den > 0, num / den, 0.0) + rho)
+             if np.max(np.abs(new - rho)) < tol:
+                 return new
+             rho = new
+@@ -228,6 +233,18 @@ def _mean_within(e, members):
+     return float(v.mean()) if len(v) else -np.inf
+ 
+ 
++def _affinity(r, a, b):
++    """Mean correlation between sets a and b over the geometric mean of their mean internal
++    correlations (data quality cancels)."""
++    between = np.nanmean(r[np.ix_(a, b)])
++    inside = [np.nanmean(r[np.ix_(x, x)][np.triu_indices(len(x), 1)]) if len(x) > 1 else np.nan
++              for x in (a, b)]
++    inside = [v for v in inside if np.isfinite(v) and v > 0]
++    if not np.isfinite(between) or not inside:
++        return -np.inf
++    return float(between / np.sqrt(np.prod(inside) if len(inside) == 2 else inside[0] ** 2))
++
++
+ def most_coherent_subset(e, pool, k, exhaustive=200_000):
+     """Mean residual within the most coherent size-k subset of `pool` (exhaustive search
+     when there are at most `exhaustive` subsets, otherwise greedy growth with swaps)."""
+@@ -292,6 +309,9 @@ class GroupDetection:
+             populations it is separated from a group's coherence must exceed.
+         min_population: smallest number of data sets in which internal structure can be
+             judged; a group is only split from a rest at least this large.
++        min_coherence: coherence (mean residual within the group, correlation units) at or
++            above which a significant group is a population of its own whatever the
++            structure of the rest; None to judge by separation_ratio alone.
+     """
+ 
+     rij: np.ndarray
+@@ -300,6 +320,7 @@ class GroupDetection:
+     significance: float = 0.01
+     separation_ratio: float = 3.5
+     min_population: int = 5
++    min_coherence: float | None = 0.03
+     max_depth: int = 8
+     exhaustive: int = 200_000
+     log: list = field(default_factory=list)
+@@ -325,7 +346,11 @@ def _analyse(self, idx, depth):
+         rest_groups = self._analyse(idx[rest], depth + 1)
+         local = [np.searchsorted(idx, g) for g in rest_groups]
+         strongest = decoy(e, local, len(members), self.exhaustive)
+-        ok = coherence > 0 and (strongest <= 0 or coherence > self.separation_ratio * strongest)
++        ok = coherence > 0 and (
++            strongest <= 0
++            or coherence > self.separation_ratio * strongest
++            or (self.min_coherence is not None and coherence >= self.min_coherence)
++        )
+         self.log.append(dict(depth=depth, n=n, p=s.p, size=len(members), coherence=coherence,
+                              decoy=strongest, accepted=bool(ok)))
+         if ok:
+@@ -336,8 +361,12 @@ def _analyse(self, idx, depth):
+             return member_groups + rest_groups
+         if len(rest_groups) == 1:
+             return [idx]
+-        # not a population of its own: back into the population it is closest to
+-        closeness = [np.nanmean(e[np.ix_(members, g)]) for g in local]
++        # not a population of its own: back into the population it is closest to, i.e. the
++        # one it correlates with as well as that population's members correlate with each
++        # other (residuals would mislead here: the two ends of one varying population have
++        # negative residuals with each other)
++        r = np.where(s.valid, self.rij[sub], np.nan)
++        closeness = [_affinity(r, members, g) for g in local]
+         j = int(np.argmax(closeness))
+         rest_groups[j] = np.sort(np.concatenate([rest_groups[j], idx[members]]))
+         return rest_groups
+diff --git a/tests/algorithms/correlation/test_groups.py b/tests/algorithms/correlation/test_groups.py
+index 9c3632a..9222e04 100644
+--- a/tests/algorithms/correlation/test_groups.py
++++ b/tests/algorithms/correlation/test_groups.py
+@@ -94,23 +94,50 @@ def test_counting_noise_alone_is_one_population(seed):
+ 
+ @pytest.mark.parametrize("seed", [8, 9, 10])
+ def test_continuous_variation_is_one_population(seed):
+-    # crystals of one population that differ continuously (e.g. in cell) are not split
+-    y, v, m = synthetic([14], heterogeneity=0.15, seed=seed)
++    # crystals of one population that differ continuously (e.g. in cell) are not split; at
++    # this amount of variation the most coherent subsets reach about 0.02, as the largest
++    # structure inside one species of the insulin data at full data (below min_coherence)
++    y, v, m = synthetic([14], heterogeneity=0.1, seed=seed)
+     assert detect(y, v, m) == [list(range(14))]
+ 
+ 
+-def test_minority_in_a_continuously_varying_majority():
+-    # the majority varies continuously (one shared pattern, normal states): the two data
+-    # sets set apart are found and the majority is not split
+-    rng = np.random.default_rng(11)
++@pytest.mark.parametrize("seed", [8, 9, 10])
++def test_strong_continuous_variation_by_separation_alone(seed):
++    # larger continuous variation is still one population by the separation ratio
++    y, v, m = synthetic([14], heterogeneity=0.15, seed=seed)
++    assert detect(y, v, m, min_coherence=None) == [list(range(14))]
++
++
++def varying_majority_and_pair(minority_shift, heterogeneity=0.1, seed=11):
++    """Twelve data sets varying continuously along one shared pattern, and two data sets set
++    apart along a pattern of their own."""
++    rng = np.random.default_rng(seed)
+     nref = 3000
+     mu = rng.exponential(1.0, nref)
+     shared, minority_pattern = rng.standard_normal((2, nref))
+-    rows = [mu + 0.15 * rng.standard_normal() * shared for _ in range(12)]
+-    rows += [mu + 0.5 * minority_pattern for _ in range(2)]
++    rows = [mu + heterogeneity * rng.standard_normal() * shared for _ in range(12)]
++    rows += [mu + minority_shift * minority_pattern for _ in range(2)]
+     y = np.array(rows) + 0.2 * rng.standard_normal((14, nref))
+     v = np.full(y.shape, 0.04)
+     m = rng.random(y.shape) < 0.8
++    return y, v, m
++
++
++@pytest.mark.parametrize("minority_shift", [0.2, 0.25, 0.3])
++def test_minority_in_a_continuously_varying_majority(minority_shift):
++    # the two data sets set apart are found and the majority is not split: half of the
++    # majority, rejected as a group of its own, goes back to the other half and not to the
++    # pair (its residuals with the other end of the majority are negative)
++    y, v, m = varying_majority_and_pair(minority_shift)
++    assert detect(y, v, m) == [list(range(12)), [12, 13]]
++
++
++def test_min_coherence_finds_a_group_beside_a_structured_majority():
++    # the pair is only about twice as coherent as the strongest structure inside the varying
++    # majority, so separation_ratio alone does not report it; its coherence (about 0.05)
++    # does
++    y, v, m = varying_majority_and_pair(0.25)
++    assert detect(y, v, m, min_coherence=None) == [list(range(14))]
+     assert detect(y, v, m) == [list(range(12)), [12, 13]]
+ 
+ 
+-- 
+2.54.0 (Apple Git-157)
+

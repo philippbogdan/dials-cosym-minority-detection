@@ -1,0 +1,128 @@
+{
+ "1|bovine": {
+  "n_segments": 4,
+  "n_pairs": 300,
+  "observed_over_reflection": 0.7414494269086231,
+  "observed_over_parametric": 3.2358863954568595,
+  "observed_over_parametric_kappa": 0.9669861239406677,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 0.8680054485330129
+ },
+ "1|porcine": {
+  "n_segments": 4,
+  "n_pairs": 300,
+  "observed_over_reflection": 1.0515087034380437,
+  "observed_over_parametric": 1.5637062491783151,
+  "observed_over_parametric_kappa": 0.923745743614841,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 0.7935658444966749
+ },
+ "1|human": {
+  "n_segments": 3,
+  "n_pairs": 300,
+  "observed_over_reflection": 1.0442706593811342,
+  "observed_over_parametric": 2.097359889745167,
+  "observed_over_parametric_kappa": 1.0161623940127968,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 0.9052784244796175
+ },
+ "2|bovine": {
+  "n_segments": 4,
+  "n_pairs": 300,
+  "observed_over_reflection": 0.9565752647781575,
+  "observed_over_parametric": 2.230791331419615,
+  "observed_over_parametric_kappa": 0.9379017632430147,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 0.8518500526484327
+ },
+ "2|porcine": {
+  "n_segments": 4,
+  "n_pairs": 300,
+  "observed_over_reflection": 1.1796961601045535,
+  "observed_over_parametric": 2.225858078861541,
+  "observed_over_parametric_kappa": 0.9116499942237343,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 0.9069386781281079
+ },
+ "2|human": {
+  "n_segments": 4,
+  "n_pairs": 300,
+  "observed_over_reflection": 1.1097882043955059,
+  "observed_over_parametric": 2.090257888200229,
+  "observed_over_parametric_kappa": 1.012912187494272,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 0.9482235652870463
+ },
+ "5|bovine": {
+  "n_segments": 4,
+  "n_pairs": 300,
+  "observed_over_reflection": 1.1140050199438238,
+  "observed_over_parametric": 1.371789842526596,
+  "observed_over_parametric_kappa": 0.8836532734159491,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 0.8251895889774203
+ },
+ "5|porcine": {
+  "n_segments": 4,
+  "n_pairs": 300,
+  "observed_over_reflection": 1.0539951264423861,
+  "observed_over_parametric": 1.840042526337247,
+  "observed_over_parametric_kappa": 0.9251694128270916,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 0.6200692382818285
+ },
+ "5|human": {
+  "n_segments": 4,
+  "n_pairs": 300,
+  "observed_over_reflection": 1.0924715696347407,
+  "observed_over_parametric": 1.6623186709405746,
+  "observed_over_parametric_kappa": 1.074899012740409,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 0.8087638414583109
+ },
+ "10|bovine": {
+  "n_segments": 4,
+  "n_pairs": 300,
+  "observed_over_reflection": 1.3275968927534905,
+  "observed_over_parametric": 2.9036814935021598,
+  "observed_over_parametric_kappa": 0.8332782277097133,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 1.3183644653048614
+ },
+ "10|porcine": {
+  "n_segments": 4,
+  "n_pairs": 300,
+  "observed_over_reflection": 1.537957596105761,
+  "observed_over_parametric": 2.5819366064046045,
+  "observed_over_parametric_kappa": 0.8430967465498436,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 0.822183832088602
+ },
+ "10|human": {
+  "n_segments": 4,
+  "n_pairs": 300,
+  "observed_over_reflection": 1.682882872932037,
+  "observed_over_parametric": 3.348048623491799,
+  "observed_over_parametric_kappa": 1.2416533120386453,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 0.8465515725582531
+ },
+ "20|bovine": {
+  "n_segments": 3,
+  "n_pairs": 300,
+  "observed_over_reflection": 1.6145630505721924,
+  "observed_over_parametric": 2.2087244183510015,
+  "observed_over_parametric_kappa": 0.817688664696474,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 0.7570290514053699
+ },
+ "20|porcine": {
+  "n_segments": 3,
+  "n_pairs": 300,
+  "observed_over_reflection": 2.58509719337842,
+  "observed_over_parametric": 5.852765503131351,
+  "observed_over_parametric_kappa": 1.0396614521913117,
+  "n_pairs_analytic": 300,
+  "observed_over_analytic": 1.3314688958115146
+ }
+}

@@ -1,0 +1,199 @@
+From 800b6af091ed1c2748d74892a4bda9d2bca9779c Mon Sep 17 00:00:00 2001
+From: Philipp Bogdan <174341097+philippbogdan@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 16:59:07 +0100
+Subject: [PATCH] correlation groups: groups smaller than min_group_size are
+ not taken out of the OPTICS clusters, decided on all of the detector's groups
+ (they are no longer merged into the largest population first, which could
+ make a minority the background); apply_min_group_size removed,
+ take_out_groups(min_group_size, keep); tests
+
+---
+ src/dials/algorithms/correlation/analysis.py |  6 +--
+ src/dials/algorithms/correlation/groups.py   | 31 ++++---------
+ tests/algorithms/correlation/test_groups.py  | 47 ++++++++++----------
+ 3 files changed, 36 insertions(+), 48 deletions(-)
+
+diff --git a/src/dials/algorithms/correlation/analysis.py b/src/dials/algorithms/correlation/analysis.py
+index 5d3c102..aafb650 100644
+--- a/src/dials/algorithms/correlation/analysis.py
++++ b/src/dials/algorithms/correlation/analysis.py
+@@ -901,7 +901,6 @@ def find_small_groups(self):
+         """
+         from dials.algorithms.correlation.groups import (
+             GroupDetection,
+-            apply_min_group_size,
+             combine_groups,
+             dense_from_target,
+             group_evidence,
+@@ -970,14 +969,15 @@ def precise(group):
+                 max_se=sg.max_se,
+             )
+ 
+-        groups = apply_min_group_size(groups, gp.min_group_size, keep=precise)
+         for step in [s for d in runs for s in d.log]:
+             logger.info(
+                 "  %(n)i data sets: candidate group of %(size)i, p = %(p).2g, coherence "
+                 "%(coherence).4f, strongest structure inside the rest %(decoy).4f, "
+                 "accepted: %(accepted)s" % step
+             )
+-        self.cluster_labels = take_out_groups(self.cluster_labels, groups)
++        self.cluster_labels = take_out_groups(
++            self.cluster_labels, groups, gp.min_group_size, keep=precise
++        )
+         logger.info(f"Populations found by the detector: {len(groups)}")
+ 
+     def _prep_optics_for_info(self) -> OrderedDict:
+diff --git a/src/dials/algorithms/correlation/groups.py b/src/dials/algorithms/correlation/groups.py
+index 215b38d..8b06d79 100644
+--- a/src/dials/algorithms/correlation/groups.py
++++ b/src/dials/algorithms/correlation/groups.py
+@@ -521,17 +521,24 @@ def _analyse(self, idx, depth):
+         return rest_groups
+ 
+ 
+-def take_out_groups(labels, groups):
++def take_out_groups(labels, groups, min_group_size=2, keep=None):
+     """Cluster labels after taking the detected groups out of the OPTICS clusters: every
+     group other than the largest becomes a cluster of its own (the largest, the background
+     population, keeps the OPTICS labels); when no group holds more than half of the data
+     sets, the detector has split the data into several populations and every group becomes
+-    a cluster. Clusters left with one data set become outliers (-1); labels are renumbered
++    a cluster. A group smaller than min_group_size is not taken out (its data sets keep their
++    OPTICS labels) unless `keep(group)` admits it; which groups are taken out is decided on all of
++    them first. Clusters left with one data set become outliers (-1); labels are renumbered
+     from 0."""
+     labels = np.array(labels, dtype=int)
+     groups = sorted((np.asarray(g) for g in groups), key=len, reverse=True)
+     if len(groups) > 1:
+         carved = groups[1:] if 2 * len(groups[0]) > len(labels) else groups
++        carved = [
++            g
++            for g in carved
++            if len(g) >= min_group_size or (keep is not None and keep(g))
++        ]
+         next_label = labels.max() + 1 if len(labels) else 0
+         for g in carved:
+             labels[g] = next_label
+@@ -597,26 +604,6 @@ def small_group_admitted(
+     )
+ 
+ 
+-def apply_min_group_size(groups, min_group_size, keep=None):
+-    """The populations with every group smaller than min_group_size returned to the background (the
+-    largest population), largest first; `keep(group)` can admit a smaller group nonetheless."""
+-    groups = sorted((np.asarray(g) for g in groups), key=len, reverse=True)
+-    if len(groups) <= 1:
+-        return groups
+-    kept = [
+-        g
+-        for g in groups[1:]
+-        if len(g) >= min_group_size or (keep is not None and keep(g))
+-    ]
+-    small = [
+-        g
+-        for g in groups[1:]
+-        if not (len(g) >= min_group_size or (keep is not None and keep(g)))
+-    ]
+-    background = np.sort(np.concatenate([groups[0]] + small)) if small else groups[0]
+-    return sorted([background] + kept, key=len, reverse=True)
+-
+-
+ def combine_groups(first, second, n):
+     """Populations from two detector runs on the same n data sets (e.g. the two noise
+     models): the groups the first reports (every group but its background population, the
+diff --git a/tests/algorithms/correlation/test_groups.py b/tests/algorithms/correlation/test_groups.py
+index 36cad4c..2e92aa2 100644
+--- a/tests/algorithms/correlation/test_groups.py
++++ b/tests/algorithms/correlation/test_groups.py
+@@ -10,7 +10,6 @@
+ from dials.algorithms.correlation.groups import (
+     GroupDetection,
+     analytic_replicates,
+-    apply_min_group_size,
+     bootstrap_replicates,
+     combine_groups,
+     dense_from_target,
+@@ -361,20 +360,21 @@ def test_take_out_groups():
+ 
+ 
+ def test_min_group_size():
+-    # groups smaller than the minimum return to the largest population
++    # groups smaller than the minimum are not taken out: their data sets keep their OPTICS labels
++    labels = [0] * 16
+     groups = [np.arange(0, 9), np.array([9, 10]), np.array([11, 12, 13, 14, 15])]
+-    out = apply_min_group_size(groups, 5)
+-    assert [g.tolist() for g in out] == [list(range(0, 11)), [11, 12, 13, 14, 15]]
+-    assert [g.tolist() for g in apply_min_group_size(groups, 2)] == [
+-        list(range(0, 9)),
+-        [11, 12, 13, 14, 15],
+-        [9, 10],
+-    ]
++    assert take_out_groups(labels, groups, 5).tolist() == [0] * 11 + [1] * 5
++    assert take_out_groups(labels, groups, 2).tolist() == [0] * 9 + [2, 2] + [1] * 5
++    # which groups are taken out is decided on all of them: two populations of about half the
++    # data sets and a small group stay two clusters (merged into one of them, the small group
++    # would make that one the background population)
++    groups = [np.arange(0, 5), np.arange(5, 10), np.array([10, 11])]
++    assert take_out_groups([0] * 12, groups, 5).tolist() == [1] * 5 + [2] * 5 + [0, 0]
+ 
+ 
+ def test_small_groups_admitted_when_precise():
+-    # a clear pair (another population) is kept below the minimum group size when its coherence is
+-    # precisely measured; with no precision allowed it returns to the background
++    # a clear pair (another population) is taken out below the minimum group size when its
++    # coherence is precisely measured; with no precision allowed it stays in the OPTICS cluster
+     y, v, m = synthetic([12, 2], shift=0.4, seed=3)
+     r = weighted_cc_matrix(y, v, m)
+     w = np.ones_like(r)
+@@ -389,18 +389,20 @@ def keep(g, max_se):
+         c, s, dd = group_evidence(r, w, deltas, g)
+         return s <= max_se and c >= 0.04 and (dd <= 0 or c / dd >= 2)
+ 
+-    assert [
+-        len(g) for g in apply_min_group_size(groups, 5, keep=lambda g: keep(g, 1.0))
+-    ] == [12, 2]
+-    assert [
+-        len(g) for g in apply_min_group_size(groups, 5, keep=lambda g: keep(g, 0.0))
+-    ] == [14]
++    labels = [0] * 14
++    assert take_out_groups(labels, groups, 5, keep=lambda g: keep(g, 1.0)).tolist() == [
++        0
++    ] * 12 + [1, 1]
++    assert (
++        take_out_groups(labels, groups, 5, keep=lambda g: keep(g, 0.0)).tolist()
++        == [0] * 14
++    )
+ 
+ 
+ def test_small_groups_need_signal_to_noise():
+     # a pair of another population is kept below the minimum group size when its coherence stands
+     # many standard errors out of the counting noise (2000 reflections); the same kind of pair over
+-    # 60 reflections, as coherent but measured imprecisely, returns to the background population
++    # 60 reflections, as coherent but measured imprecisely, stays in the OPTICS cluster
+     def pair(nref):
+         y, v, m = synthetic([12, 2], shift=0.4, nref=nref, seed=3)
+         r = weighted_cc_matrix(y, v, m)
+@@ -413,16 +415,15 @@ def pair(nref):
+         def keep(g):
+             return small_group_admitted(*group_evidence(r, w, deltas, g), len(g))
+ 
+-        return group_evidence(r, w, deltas, np.array([12, 13])), apply_min_group_size(
+-            groups, 5, keep=keep
+-        )
++        evidence = group_evidence(r, w, deltas, np.array([12, 13]))
++        return evidence, take_out_groups([0] * 14, groups, 5, keep=keep).tolist()
+ 
+     (coherence, se, _), out = pair(2000)
+     assert coherence > 30 * se
+-    assert [len(g) for g in out] == [12, 2]
++    assert out == [0] * 12 + [1, 1]
+     (coherence, se, _), out = pair(60)
+     assert coherence - 2 * se > 0.1 and coherence < 30 * se
+-    assert [len(g) for g in out] == [14]
++    assert out == [0] * 14
+     # the conditions one by one; max_se bounds the standard error (0: never)
+     assert small_group_admitted(0.03, 0.0005, 0.005, 2)
+     assert not small_group_admitted(0.03, 0.002, 0.005, 2)  # 15 standard errors
+-- 
+2.54.0 (Apple Git-157)
+

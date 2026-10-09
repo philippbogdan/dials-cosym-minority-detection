@@ -1,0 +1,14 @@
+{
+  "source_head": "e84b60b50df3ff2cb628a82d43fd7712ed2b32ce",
+  "verdict_commit": "458cb6bcd63306d74e83e5fa45f492897c64f4a1",
+  "dials_version": "3.30.1",
+  "xia2_version": "3.30.0",
+  "recorded_report_environment": {
+    "python": "3.12.12",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "jinja2": "3.1.6"
+  },
+  "record_identifiers": "Result code_commit fields identify commits in the original research history, not commits in this public copy.",
+  "record_changes": "Local paths and operational details have been replaced with relative paths or neutral wording. Numerical measurements are retained. JSON Lines records are stored with lossless gzip compression."
+}

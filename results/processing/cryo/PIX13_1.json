@@ -1,0 +1,36 @@
+{
+ "collection": "cryo",
+ "crystal": "PIX13_1",
+ "species": "porcine",
+ "dials_version": "DIALS 3.30",
+ "n_images": 100,
+ "oscillation": [
+  0.0,
+  0.1
+ ],
+ "image_range": [
+  1,
+  100
+ ],
+ "unit_cell": [
+  67.1414510199002,
+  67.141214354995,
+  67.18618548226291,
+  109.49600959486749,
+  109.432521798364,
+  109.41110989090032
+ ],
+ "space_group": "P 1",
+ "n_strong": 5570,
+ "n_indexed": 5474,
+ "n_integrated_prf": 28272,
+ "n_integrated_sum": 33018,
+ "n_reflections": 33845,
+ "wavelength": 0.9998699999999999,
+ "index_retry": false,
+ "rmsd_xy_phi": [
+  0.16751,
+  0.18994,
+  0.11809
+ ]
+}

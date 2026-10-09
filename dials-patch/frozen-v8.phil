@@ -1,0 +1,21 @@
+# v8 (PREREGISTRATION.md amendment 20; dials-patch/0001-0011, PATCH_MAX=11): today's DIALS
+# 3.30.1 defaults, plus the calibrated small-group detector of dials-patch/0001-0011 (run with the
+# analytic and the bootstrap counting noise, groups combined; min_coherence 0.05 for a pair, 0.05 * 2
+# / k for a group of k; pairs need p < 0.001 with the analytic noise); groups smaller than 5 (OPTICS's
+# own smallest cluster) are not taken out unless precisely measured and clearly coherent
+# (small_groups). With 0001-0013 the same rule is small_groups.min_signal_to_noise = 0 and these values.
+significant_clusters.find_small_groups = True
+significant_clusters.groups.significance = 0.01
+significant_clusters.groups.separation_ratio = 3.5
+significant_clusters.groups.min_population = 5
+significant_clusters.groups.min_coherence = 0.05
+significant_clusters.groups.pair_significance = 0.001
+significant_clusters.groups.min_usable_pairs = 3
+significant_clusters.groups.min_group_size = 5
+significant_clusters.groups.small_groups.max_se = 0.002
+significant_clusters.groups.small_groups.z = 2
+significant_clusters.groups.small_groups.min_coherence = 0.04
+significant_clusters.groups.small_groups.min_ratio = 2
+significant_clusters.groups.noise_model = both
+significant_clusters.groups.n_replicates = 100
+significant_clusters.groups.seed = 0

@@ -1,0 +1,231 @@
+{%- set P = n.primary -%}
+{%- set C = 'cryo' -%}
+{%- set R = 'rt' -%}
+# Report
+
+Numbers from the results files of commit `{{ n.commit }}` (`python -m cf.report && python -m
+cf.render`; `bash reproduce.sh` regenerates everything). "Today" is DIALS 3.30.1 with every default
+(`dials.correlation_matrix`, the clustering `xia2.multiplex` runs). {{ n.configurations|length }} configurations of the proposed
+change (`dials-patch/`) are judged, each on data it was not tuned on:
+{% for c in n.configurations %}
+- **{{ c.name }}**{{ ': the change as proposed, its defaults' if c.name == P else '' }} (amendment {{ c.amendment }}, `dials-patch/{{ c.patches }}`): {{ c.does }}.
+{%- if c.name == n.preregistered %} Cryo numbers in-sample; **room temperature is its held-out judgement, and it fails it: it
+  raises the false-group rate there** (`FINDINGS.md` F4, F8).{% endif %}
+{%- endfor %}
+
+Cryo and room-temperature numbers of {{ n.judged[1:]|join(', ') }} are in-sample; **their held-out judgement is the third
+collection** (Zenodo 15077303, amendments 19-26), none of whose trials ran before all were frozen.
+
+Claims and their evidence: `FINDINGS.md`.
+
+## Each criterion, before and after
+
+### Fidelity (reference: the paper)
+
+| setting | paper | today's DIALS here |
+|---|---|---|
+| 36 cryo crystals, full data (`xia2.multiplex`) | 3 species-pure clusters, no outliers, 3 dimensions, 1.26 A | {{ n.fidelity.multiplex_cryo_full.n_clusters }} clusters, species-pure: {{ n.fidelity.multiplex_cryo_full.pure }}, {{ n.fidelity.multiplex_cryo_full.n_outliers }} outliers, {{ n.fidelity.multiplex_cryo_full.dims }} dimensions, {{ n.fidelity.multiplex_cryo_full.resolution_filter }} A |
+| cryo cut to 1 degree | separated (down to 0.8 degrees) | {{ n.fidelity.multiplex_cryo_10_images.n_clusters }} clusters, species-pure: {{ n.fidelity.multiplex_cryo_10_images.pure }}, {{ n.fidelity.multiplex_cryo_10_images.n_outliers }} outliers |
+| cryo cut to 0.8 degrees | separated; below it data sets become outliers | {{ n.fidelity.multiplex_cryo_8_images.n_clusters }} clusters, species-pure: {{ n.fidelity.multiplex_cryo_8_images.pure }}, {{ n.fidelity.multiplex_cryo_8_images.n_outliers }} outlier |
+| the paper's 215 room-temperature data sets (DIALS's reference coordinates) | 83, 85, 28 and 19 outliers | 83, 82, 28 and 22 outliers: 3 data sets of one cluster become outliers, every other label as published |
+
+Difference explained: on the room-temperature reference set three data sets of one cluster are outliers
+under today's defaults (the defaults changed after the paper); at 0.8 degrees one porcine crystal is an
+outlier where the paper reports none until below 0.8 degrees.
+
+### Detection (reference: species labels of the Zenodo records)
+
+k90 (crystals; fraction of the trial), before (today) and after ({{ n.judged|join(', ') }}):
+
+| collection | species pair | wedge | today | {{ n.judged|join(' | ') }} |
+|---|---|---|---|---|---|---|---|
+{%- for coll in (C, R) %}{% for pair, name in PAIR_NAMES.items() %}{% for w in WEDGES[coll] %}
+{%- set key = coll ~ '|' ~ pair ~ '|' ~ (w|string if w is not number else ('%g'|format(w))) %}
+{%- set a = n.get(coll ~ '|today', {}).get('detection', {}).get(key) %}
+{%- set cells = [] %}{% for p in n.judged %}{% set b = n.get(coll ~ '|' ~ p, {}).get('detection', {}).get(key) %}{% set _ = cells.append(kfrac(b.k90, coll) if b else '-') %}{% endfor %}
+{%- if a %}
+| {{ coll }} | {{ name }} | {{ '%g'|format(w) }} deg | {{ kfrac(a.k90, coll) }} | {{ cells|join(' | ') }} |
+{%- endif %}{% endfor %}{% endfor %}{% endfor %}
+
+Minorities found (k >= 2), all cells:{% for coll in (C, R) %} {{ 'cryo' if coll == C else 'room temperature' }}{% for p in ['today'] + n.judged %}{% if (coll ~ '|' ~ p) in n %} {{ p }} {{ ci(*totals(n, coll, p).found) }}{% if not loop.last %},{% endif %}{% endif %}{% endfor %}{{ ';' if coll == C else '.' }}{% endfor %}
+{%- set H = n.get('heldout') %}{% if H %} Third collection (held out):{% for p, v in H.procedures.items() %} {{ p }} {{ ci(*v.found[:2]) }}{% if not loop.last %},{% endif %}{% endfor %}.{% endif %}
+
+### False groups (reference: single-population trials)
+
+{{ false_group_table(n, C, ['today'] + (n.judged|select('in', present(n, C))|list)) }}
+
+{{ false_group_table(n, R, ['today'] + (n.judged|select('in', present(n, R))|list)) }}
+{% if H %}
+Third collection (held out; paired against today's DIALS on the same single-population trials):
+
+{{ heldout_table(n) }}
+{% endif %}
+
+### The frontier (detection, false groups, cost; every procedure run on every trial)
+
+Cryo:
+
+{{ frontier_table(n, C, ('frozen', 'ablation')) }}
+
+{% if (R ~ '|frontier') in n -%}
+Room temperature:
+
+{{ frontier_table(n, R, ('frozen', 'ablation')) }}
+{%- endif %}
+
+Development prototypes on cryo (detector alone, without OPTICS; cost not comparable):
+
+{{ frontier_table(n, C, ('development',)) }}
+
+### Limits (reference: the measurements of `cf/limits3.py`)
+
+Misses of each frozen procedure by what limits them (minorities with k >= 2), across the collections
+(amendment 18: one configuration for every sample, so a group of one species in either collection's
+single-population data counts as structure):
+
+Cryo:
+
+{{ misses_by_procedure(n, C, ['today', 'v1', 'v2', 'v3', 'v4'] + n.judged, key='misses_cross') }}
+
+Room temperature:
+
+{{ misses_by_procedure(n, R, ['today', 'v1', 'v2', 'v3', 'v4'] + (n.judged|select('in', present(n, R))|list), key='misses_cross') }}
+
+Per collection (a procedure told which kind of sample it has):
+
+Cryo:
+
+{{ misses_by_procedure(n, C, ['today', 'v1', 'v2', 'v3', 'v4'] + n.judged) }}
+
+Room temperature:
+
+{{ misses_by_procedure(n, R, ['today', 'v1', 'v2', 'v3', 'v4'] + (n.judged|select('in', present(n, R))|list)) }}
+
+The k90 the data allow against the procedures' (`FINDINGS.md` F6 for the full tables). Cells where {{ P }}'s k90
+is above what the data allow with the noise one experiment can know, across the collections: cryo
+{{ gap_cells(n, C, P, cross=True)|join('; ') or 'none' }}{% if (R ~ '|' ~ P) in n %}; room temperature {{ gap_cells(n, R, P, cross=True)|join('; ') or 'none' }}{% endif %};
+per collection: cryo {{ gap_cells(n, C, P)|join('; ') or 'none' }}{% if (R ~ '|' ~ P) in n %}; room temperature
+{{ gap_cells(n, R, P)|join('; ') or 'none' }}{% endif %}.
+
+### Evidence
+
+Every number above comes from commit `{{ n.commit }}`; the trial runners record the code commit of
+every result line. Each configuration is judged on data it was not tuned on. {{ n.preregistered }}: every procedure and
+frontier point run on room temperature was frozen before any room-temperature result of any of them
+existed (PREREGISTRATION.md amendments 3-13), and {{ n.preregistered }} failed that judgement on false groups.
+{{ n.judged[1:]|join(', ') }} (amendments 17-26) were chosen after it, on both collections;
+their judgement is the third collection (amendment 19: its labels verified against the labelled
+room-temperature crystals before any trial; amendment 21: its pipeline stopped during processing so that
+no trial ran before the last of them was frozen; amendment 25: its labels in the order the verification
+settles; nothing tuned on it).
+{%- set H = n.get('heldout') %}{% if not H or not H.procedures.get(P) %} **It is not yet measured.**{% endif %}
+
+## What failed
+{% set pv6 = n.get(R ~ '|paired_false_groups_' ~ n.preregistered) %}
+- **{{ n.preregistered }} on room temperature, its held-out judgement**: it finds {{ totals(n, R, n.preregistered).found[0] }} of {{ totals(n, R, n.preregistered).found[1] }} minorities (today's
+  DIALS {{ totals(n, R, 'today').found[0] }}) but reports a group in {{ totals(n, R, n.preregistered).false_groups[0] }} of {{ totals(n, R, n.preregistered).false_groups[1] }} single-population trials (today's {{ totals(n, R, 'today').false_groups[0] }}){% if pv6 %}, {{ pv6.only_b }} of
+  them where today's DIALS reports none{% endif %}. Room-temperature crystals of one species hold sub-groups of
+  two to four as distinct as a species minority there (`FINDINGS.md` F8); its thresholds, set on cryo where
+  the species differ several times more, report them. Every other procedure frozen before room
+  temperature raised it as well (the frontier above).
+- **v1** (separation ratio only, amendment 3): missed minorities next to a majority with strong internal
+  structure (porcine majorities), because relative to the majority's own structure they are no more
+  distinct than the strongest group inside one species.
+- **A flat coherence threshold** (v2, 0.03 then 0.05): 0.03 reported a porcine pair as a group in a
+  single-population trial once the patch's own bootstrap seed was used (0.038, p = 0.004); 0.05 for
+  every size missed groups of four to six next to structured majorities (coherence falls as 1/k).
+- **The bootstrap over reflections** as counting noise (v1-v3): it overstates the noise of correlations
+  over few shared reflections up to five-fold (F5), so small groups at small wedges never reached
+  significance.
+- **Calibrated noise without guards** (several prototypes, v3 with analytic noise): pairs of crystals of
+  one species at small wedges stood out as strongly as species pairs and were reported (1-6 false groups
+  on cryo).
+- **Self-calibration of the noise from the residuals' spread** (scaled parametric replicates, robust
+  scaling of the analytic model): wrong where real heterogeneity is present (full data) or the matrix is
+  sparse (0.2 degrees).
+- **Noise-scaled or look-elsewhere thresholds on coherence**: removed the false groups but gave back
+  more detections than the stricter pair significance of v4.
+- **A combined scan statistic** (gap or mean within) and a weaker guard on sparse data (development v6):
+  no gain on cryo, one false group with the weaker guard; not adopted.
+{%- set fr = n.get(C ~ '|frontier', {}) %}
+{%- set a = fr.get('prototype alt_amp (detector alone)') %}{% set a1 = fr.get('prototype alt_amp_c0.1 (detector alone)') %}
+- **Amplitude correlations instead of DIALS's intensity correlations** (development after v6, cryo;
+  amendment 14): the detector on Pearson's r of the square roots of the intensities, with v6's
+  parameters{% if a and not a.get('incomplete') %}, found {{ a.found }} of {{ a.n_mix }} minorities but reported groups in {{ a.false_groups }} of
+  {{ a.n_single }} single-population trials{% endif %} (Fisher's z understates the noise of amplitude
+  correlations up to 1.7-fold, F5){% if a1 and not a1.get('incomplete') %}; with its coherence threshold doubled, {{ a1.found }} found and
+  {{ a1.false_groups }} false group(s){% endif %}. Calibrated against the repeats, amplitudes separate almost exactly the
+  minorities DIALS's matrix separates (F6), so the gain was the noise model's error, not information.
+{%- set p7 = fr.get('prototype p7_sparse (detector alone)') %}{% set p7l = fr.get('prototype p7_sparse_local (detector alone)') %}{% set p7i = fr.get('prototype p7_sparse_iter (detector alone)') %}
+- **A detector for the sparse regime** (development after v6, cryo; `cf/proc7.py`): where v6's detector
+  examines nothing (every trial at 0.2 degrees, nearly every one at 0.3), a scan of the inverse-variance
+  statistic over the pairs that have an error, groups of three or more, look-elsewhere at 0.001, v6's
+  rules{% if p7 and not p7.get('incomplete') %}: {{ p7.found }} minorities found (as v6) and groups in {{ p7.false_groups }} of {{ p7.n_single }}
+  single-population trials{% endif %}; restricted to trials of ten or more and repeated up to three times{% if p7i and not p7i.get('incomplete') %},
+  {{ p7i.found }} found and {{ p7i.false_groups }} false groups{% endif %}; with the search improved by single add, remove and swap moves (in
+  the noise replicates alike){% if p7l and not p7l.get('incomplete') %}, {{ p7l.found }} found and {{ p7l.false_groups }} false groups{% endif %}. Searched blind,
+  the most significant group there holds part of the minority with as many majority crystals, or is a
+  strongly correlated pair elsewhere. One minority in 720 did not justify a new procedure untested on
+  room temperature; not adopted.
+- **A small-group rule with an absolute precision gate and coherence floor** ({{ n.precise }}, amendment 20): the
+  bovine-human and human-bovine pairs at 60 degrees on room temperature stand 60-100 standard errors out of
+  their noise but have a coherence of 0.03-0.04, under its floor of 0.04 x 2/k; it leaves
+  {{ gap_cells(n, R, n.precise, cross=True)|length }} room-temperature cell(s) above the data's limit across the collections ({{ gap_cells(n, R, n.precise, cross=True)|join('; ') or 'none' }}). Replaced by a condition on how far the coherence stands
+  out of its own noise ({{ n.snr }}, amendment 22).
+- **Merging the groups too small into the largest population before the take-out** ({{ n.floor_only }}-{{ n.snr }}): when the
+  detector splits a trial into two populations of about half each, the merged one can come to hold more than
+  half and stay as the background, losing the minority (`FINDINGS.md` F4); {{ n.takeout }} decides the take-out first
+  (amendment 23), as {{ P }} does.
+{%- set a24 = n.get(R ~ '|amendment24') %}
+- **Comparators of the design's minority sizes only** (the limits, amendments 14-23): sub-groups of a minority
+  of 7, 9 or 11 crystals had no single-population group to be compared with and counted as separable
+  untested. Amendment 24 compares every size from 2 to n/2{% if a24 %}; on room temperature this moves
+  {{ a24.cross.moved }} minorities across the collections ({{ a24.per_collection.moved }} per collection) from separable to a limit of the
+  data, {{ a24.cross.misses.get(P, 0) }} of them misses of {{ P }}{% endif %}.
+- **Defects found and fixed on the way**: the rank-1 fit stopped short of convergence (simultaneous
+  update), a rejected candidate was merged back by residual (sending half of a varying population to a
+  minority), correlations without an analytic error were kept with a near-zero spread, and a minority
+  that was the detector's largest group was left inside the OPTICS cluster; and in the measurement of the limits, the test of a
+  minority judged only the whole minority, while "found" accepts a cluster holding half of it
+  (amendment 14; on cryo it moved individual verdicts, no cell's limit). In the harness that runs the
+  frozen procedures from the saved arrays: a helper named like the take-out rule replaced it in the first
+  v11 runs (they disagreed with v11's exact derivation from v6's groups, which is how it was found; rerun);
+  an end-to-end run read the parameter file per trial while a later configuration's replaced it (rerun
+  with the file pinned; for a while records of both runs sat in one directory, which showed two failures
+  that the rerun does not have); one cause replay mixed the records of two runs (rerun clean).
+
+{% set mc = miss_totals(n, C, P) -%}
+## What remains open
+
+- **Minorities attributed to the procedure** after all limits of the data, across the collections (one
+  configuration for every sample): {% for coll in (C, R) %}{% if (coll ~ '|' ~ P) in n %}{% set mw = misses_by_wedge(n, coll, P, key='misses_cross') %}{{ 'cryo' if coll == C else 'room temperature' }} {{ miss_totals(n, coll, P, key='misses_cross').get('procedure', 0) }} of {{ totals(n, coll, P).found[1] }}{% if mw %} ({% for w, c in mw %}{{ c }} at {{ w }} deg{% if not loop.last %}, {% endif %}{% endfor %}){% endif %}{% if not loop.last %}; {% endif %}{% endif %}{% endfor %};
+  per collection: {% for coll in (C, R) %}{% if (coll ~ '|' ~ P) in n %}{{ 'cryo' if coll == C else 'room temperature' }} {{ miss_totals(n, coll, P).get('procedure', 0) }}{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}
+  (`COMPLETE.md` section 7 lists them).
+{%- for coll in (C, R) %}{% set us = n.get(coll ~ '|unexplained_summary') %}{% if us and us.with_group %} {{ 'Cryo' if coll == C else 'Room temperature' }}: {{ us.with_group }} of the {{ us.n }} are
+  groups of two to four that {{ n.preregistered }} reports, measured as {{ P }} measures them standing {{ '%.0f'|format(us.snr[0]) }}-{{ '%.0f'|format(us.snr[1]) }} standard errors out
+  of their noise with a standard error of {{ '%.4f'|format(us.se[0]) }}-{{ '%.4f'|format(us.se[1]) }}; each fails both of {{ P }}'s conditions
+  (30 standard errors out and 1.5 times the rest's own structure, or a standard error of at most 0.002 and
+  twice that structure), which the sub-groups of one species set (F8).{% if us.idle %} {{ us.idle }} are where its detector
+  examines nothing.{% endif %}{% endif %}{% endfor %}{% set c02 = misses_by_wedge(n, C, P, key='misses_cross')|selectattr(0, 'equalto', '0.2')|list %}{% if c02 %} At 0.2 degrees per crystal (cryo), {{ P }}'s
+  detector examines nothing: no data set keeps three correlations with an error, the guard that keeps
+  pairs of one species from being reported at small wedges. With their members known a group of them
+  stands out of the noise; searched blind (two prototypes, What failed) the most significant group mixes
+  them with majority crystals. Whether any blind procedure separates them is open.{% endif %}
+- **How much the limits depend on the measurement** (`FINDINGS.md` F6): in a few cells the k90 the
+  data allow moves by one to a few crystals under another statistic, without the structure test's
+  tolerance, on amplitude correlations or on either matrix, always on minorities at the test's edge
+  (p close to 0.001, two to four draws per size). A finer limit there needs more draws than the public
+  collections hold, and a procedure using several matrices at once that keeps the false-group rate.
+- **Noise known only from repeat measurements**: minorities that would be separable if the counting
+  noise of correlations over 10-20 shared reflections were known as precisely as repeat measurements of
+  the same crystals show it. Neither the analytic error nor a jackknife over reflections, which one
+  experiment can compute, reproduces it (F5); whether a calibration learned on other crystals transfers
+  is checked against room temperature's own repeats (F5).
+- **Structure inside one species** is a property of the crystals, not of the procedure: groups of one
+  species (cell size, single crystals with something in common at small wedges) are as coherent as a
+  species minority; separating them would need information beyond the intensities' correlations.
+- The size of the public collections (12 and 25 per species) bounds the largest minority fraction
+  tested, and the single-population sample (189 cryo, 180 room-temperature trials, 30 of the third
+  collection) how small a false-group rate can be shown: none in 189 is compatible with a true rate up to
+  1.9% (95%), none in 30 with up to 12%. The third collection's single-population trials hold no sub-group
+  that even {{ n.preregistered }} reports, so its judgement tests the false-group rate weakly (`FINDINGS.md` F10).

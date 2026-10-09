@@ -1,0 +1,24 @@
+OPTICS identified 3 clusters and 0 outlier datasets.
+Cluster 0
+  Number of datasets: 12
+  Completeness: 99.7 %
+  Multiplicity: 12.15
+  Datasets:0,1,2,3,4,5,6,7,8,9,10,11
+Cluster 1
+  Number of datasets: 12
+  Completeness: 99.5 %
+  Multiplicity: 12.07
+  Datasets:12,13,14,15,16,17,18,19,20,21,22,23
+Cluster 2
+  Number of datasets: 12
+  Completeness: 99.6 %
+  Multiplicity: 12.09
+  Datasets:24,25,26,27,28,29,30,31,32,33,34,35
+xia2.multiplex used... dials-general, dials.correlation_matrix, dials.cosym, dials.scale, xia2.multiplex
+Here are the appropriate citations (BIBTeX in xia2.multiplex-citations.bib)
+Beilsten-Edmands, J. et al. (2020) Acta Cryst. D76, 385-399.
+Gildea, R. J. and Winter, G. (2018) Acta Cryst. D74, 405-410.
+Gildea, R. J. et al. (2022) Acta Cryst. D78, 752-769.
+Thompson, A. J. et al. (2025) Acta Cryst. D81, 278-290.
+Winter, G. et al. (2018) Acta Cryst. D74, 85-97.
+Processing took 00h 03m 06s

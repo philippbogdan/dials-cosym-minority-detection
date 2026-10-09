@@ -1,0 +1,32 @@
+# The proposed procedure with its defaults (v11, PREREGISTRATION.md amendment 26): today's DIALS
+# 3.30.1 defaults, plus the calibrated small-group detector of dials-patch/0001-0015 (run with the
+# analytic and the bootstrap counting noise, groups combined; min_coherence 0.05 for a pair, 0.05 * 2
+# / k for a group of k; pairs need p < 0.001 with the analytic noise). Which groups are taken out of
+# the OPTICS clusters is decided on all of them; a group smaller than 5 (OPTICS's own smallest
+# cluster) is not taken out unless its coherence stands 30 standard errors out of the counting noise,
+# 2 standard errors above 0.01 * 2 / k and 1.5 times above the strongest structure of its size inside
+# the rest (small_groups), or is measured with a standard error of at most 0.002, 2 standard errors
+# above 0.04 * 2 / k and twice the rest's structure (small_groups.precise). v10 (amendment 23):
+# frozen-v10.phil; v9 (amendment 22): frozen-v9.phil; v8 (amendment 20): frozen-v8.phil; v7
+# (amendment 17): frozen-v7.phil; v6, the procedure frozen before room temperature (amendment 12):
+# frozen-v6.phil.
+significant_clusters.find_small_groups = True
+significant_clusters.groups.significance = 0.01
+significant_clusters.groups.separation_ratio = 3.5
+significant_clusters.groups.min_population = 5
+significant_clusters.groups.min_coherence = 0.05
+significant_clusters.groups.pair_significance = 0.001
+significant_clusters.groups.min_usable_pairs = 3
+significant_clusters.groups.min_group_size = 5
+significant_clusters.groups.small_groups.min_signal_to_noise = 30
+significant_clusters.groups.small_groups.max_se = None
+significant_clusters.groups.small_groups.z = 2
+significant_clusters.groups.small_groups.min_coherence = 0.01
+significant_clusters.groups.small_groups.min_ratio = 1.5
+significant_clusters.groups.small_groups.precise.max_se = 0.002
+significant_clusters.groups.small_groups.precise.z = 2
+significant_clusters.groups.small_groups.precise.min_coherence = 0.04
+significant_clusters.groups.small_groups.precise.min_ratio = 2
+significant_clusters.groups.noise_model = both
+significant_clusters.groups.n_replicates = 100
+significant_clusters.groups.seed = 0

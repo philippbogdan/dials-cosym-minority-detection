@@ -1,0 +1,120 @@
+From 82c60fee3829f3f0ea9d9fd8c10407fc4d6c2780 Mon Sep 17 00:00:00 2001
+From: Philipp Bogdan <174341097+philippbogdan@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 03:41:03 +0100
+Subject: [PATCH] correlation groups: take_out_groups; every group becomes a
+ cluster when none holds more than half of the data sets
+
+When the detector splits the majority into several groups, the minority can be its largest
+group; it then kept the OPTICS labels and was not reported. take_out_groups (unit-tested)
+replaces the inline relabelling.
+---
+ src/dials/algorithms/correlation/analysis.py | 19 +++------------
+ src/dials/algorithms/correlation/groups.py   | 25 ++++++++++++++++++++
+ tests/algorithms/correlation/test_groups.py  | 17 +++++++++++++
+ 3 files changed, 45 insertions(+), 16 deletions(-)
+
+diff --git a/src/dials/algorithms/correlation/analysis.py b/src/dials/algorithms/correlation/analysis.py
+index c3a08ff..601c1e7 100644
+--- a/src/dials/algorithms/correlation/analysis.py
++++ b/src/dials/algorithms/correlation/analysis.py
+@@ -867,6 +867,7 @@ def find_small_groups(self):
+             GroupDetection,
+             dense_from_target,
+             noise_replicates,
++            take_out_groups,
+         )
+ 
+         gp = self.params.significant_clusters.groups
+@@ -901,22 +902,8 @@ def find_small_groups(self):
+                 "%(coherence).4f, strongest structure inside the rest %(decoy).4f, "
+                 "accepted: %(accepted)s" % step
+             )
+-        labels = np.array(self.cluster_labels, dtype=int)
+-        next_label = labels.max() + 1 if len(labels) else 0
+-        # the largest group keeps the OPTICS labels; every other group becomes a cluster
+-        for g in groups[1:]:
+-            labels[g] = next_label
+-            next_label += 1
+-        # renumber, and data sets left alone in a cluster become outliers
+-        new = np.full_like(labels, -1)
+-        k = 0
+-        for lab in sorted(set(labels) - {-1}):
+-            members = labels == lab
+-            if members.sum() >= 2:
+-                new[members] = k
+-                k += 1
+-        self.cluster_labels = new
+-        logger.info(f"Groups taken out of the OPTICS clusters: {len(groups) - 1}")
++        self.cluster_labels = take_out_groups(self.cluster_labels, groups)
++        logger.info(f"Populations found by the detector: {len(groups)}")
+ 
+     def _prep_optics_for_info(self) -> OrderedDict:
+         """
+diff --git a/src/dials/algorithms/correlation/groups.py b/src/dials/algorithms/correlation/groups.py
+index d511912..dbf5811 100644
+--- a/src/dials/algorithms/correlation/groups.py
++++ b/src/dials/algorithms/correlation/groups.py
+@@ -467,3 +467,28 @@ def _analyse(self, idx, depth):
+         j = int(np.argmax(closeness))
+         rest_groups[j] = np.sort(np.concatenate([rest_groups[j], idx[members]]))
+         return rest_groups
++
++
++def take_out_groups(labels, groups):
++    """Cluster labels after taking the detected groups out of the OPTICS clusters: every
++    group other than the largest becomes a cluster of its own (the largest, the background
++    population, keeps the OPTICS labels); when no group holds more than half of the data
++    sets, the detector has split the data into several populations and every group becomes
++    a cluster. Clusters left with one data set become outliers (-1); labels are renumbered
++    from 0."""
++    labels = np.array(labels, dtype=int)
++    groups = sorted((np.asarray(g) for g in groups), key=len, reverse=True)
++    if len(groups) > 1:
++        carved = groups[1:] if 2 * len(groups[0]) > len(labels) else groups
++        next_label = labels.max() + 1 if len(labels) else 0
++        for g in carved:
++            labels[g] = next_label
++            next_label += 1
++    new = np.full_like(labels, -1)
++    k = 0
++    for lab in sorted(set(labels.tolist()) - {-1}):
++        members = labels == lab
++        if members.sum() >= 2:
++            new[members] = k
++            k += 1
++    return new
+diff --git a/tests/algorithms/correlation/test_groups.py b/tests/algorithms/correlation/test_groups.py
+index 28f2636..16c318f 100644
+--- a/tests/algorithms/correlation/test_groups.py
++++ b/tests/algorithms/correlation/test_groups.py
+@@ -15,6 +15,7 @@
+     effective_sizes,
+     noise_replicates,
+     rank1_fit,
++    take_out_groups,
+     weighted_cc_matrix,
+ )
+ from dials.algorithms.symmetry.cosym import target as cosym_target
+@@ -248,3 +249,19 @@ def test_a_pair_needs_pair_significance():
+     # a pair just significant at 0.01 is not reported when pairs need 0.001
+     y, v, m = synthetic([12, 2], shift=0.4, seed=3)
+     assert detect(y, v, m, pair_significance=1e-300, significance=1.0) == [list(range(14))]
++
++
++def test_take_out_groups():
++    # one OPTICS cluster of eight, an outlier; the detector found a pair: the pair becomes a
++    # cluster, the largest group keeps the OPTICS labels, the outlier stays an outlier
++    labels = [0, 0, 0, 0, 0, 0, 0, 0, -1]
++    groups = [[0, 1, 2, 3, 4, 5, 8], [6, 7]]
++    assert take_out_groups(labels, groups).tolist() == [0, 0, 0, 0, 0, 0, 1, 1, -1]
++    # no group holds half of the data sets: every group becomes a cluster, so a minority that
++    # is the detector's largest group is not left inside the OPTICS cluster
++    groups = [[0, 1, 2], [3, 4], [5, 6], [7, 8]]
++    assert take_out_groups(labels, groups).tolist() == [0, 0, 0, 1, 1, 2, 2, 3, 3]
++    # two halves: no background, both become clusters
++    assert take_out_groups([0, 0, 0, -1], [[0, 1], [2, 3]]).tolist() == [0, 0, 1, 1]
++    # one group: the OPTICS labels stand
++    assert take_out_groups([0, 0, 1, 1], [[0, 1, 2, 3]]).tolist() == [0, 0, 1, 1]
+-- 
+2.54.0 (Apple Git-157)
+

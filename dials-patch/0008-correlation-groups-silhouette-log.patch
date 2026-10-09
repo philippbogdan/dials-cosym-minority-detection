@@ -1,0 +1,81 @@
+From 65b20fad535a4bc1dd39bd3083f8347f23d9152b Mon Sep 17 00:00:00 2001
+From: Philipp Bogdan <174341097+philippbogdan@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 11:58:04 +0100
+Subject: [PATCH 8/9] correlation groups: report OPTICS's silhouette only when
+ it is a number (the detector can add clusters to OPTICS's one); end-to-end
+ test with a group taken out of a single OPTICS cluster
+
+---
+ src/dials/algorithms/correlation/analysis.py |  4 +-
+ tests/algorithms/correlation/test_groups.py  | 40 ++++++++++++++++++++
+ 2 files changed, 43 insertions(+), 1 deletion(-)
+
+diff --git a/src/dials/algorithms/correlation/analysis.py b/src/dials/algorithms/correlation/analysis.py
+index d599efd..855e528 100644
+--- a/src/dials/algorithms/correlation/analysis.py
++++ b/src/dials/algorithms/correlation/analysis.py
+@@ -858,7 +858,9 @@ def cluster_cosine_coords(self):
+             f"OPTICS identified {len(self.significant_clusters)} clusters and {len(self.outliers)} outlier datasets."
+         )
+ 
+-        if len(self.significant_clusters) > 1:
++        # the silhouette is OPTICS's; with find_small_groups there can be more clusters than
++        # OPTICS reported (one: the silhouette is then a message, not a number)
++        if len(self.significant_clusters) > 1 and not isinstance(silhouette, str):
+             logger.info(f"Silhouette score of OPTICS result is {silhouette:.4f}.")
+ 
+         for i in self.significant_clusters:
+diff --git a/tests/algorithms/correlation/test_groups.py b/tests/algorithms/correlation/test_groups.py
+index 453d270..c2ea253 100644
+--- a/tests/algorithms/correlation/test_groups.py
++++ b/tests/algorithms/correlation/test_groups.py
+@@ -189,6 +189,46 @@ def test_find_small_groups_in_correlation_matrix(dials_data, run_in_tmp_path):
+     matrices.convert_to_html_json()
+ 
+ 
++def test_groups_taken_out_of_a_single_optics_cluster(
++    dials_data, run_in_tmp_path, monkeypatch
++):
++    # OPTICS finds one cluster (its silhouette is then a message, not a number); the groups
++    # the detector reports become clusters of their own and are reported as such
++    from dials.algorithms.correlation import groups as groups_module
++    from dials.algorithms.correlation.analysis import CorrelationMatrix
++    from dials.command_line.correlation_matrix import phil_scope
++    from dials.util.multi_dataset_handling import (
++        assign_unique_identifiers,
++        parse_multiple_datasets,
++    )
++    from dials.util.options import ArgumentParser, reflections_and_experiments_from_files
++
++    monkeypatch.setattr(
++        groups_module,
++        "combine_groups",
++        lambda first, second, n: [np.array([0, 1]), np.array([2, 3])],
++    )
++    mcp = dials_data("vmxi_proteinase_k_sweeps", pathlib=True)
++    args = [str(mcp / f"experiments_{i}.expt") for i in range(4)]
++    args += [str(mcp / f"reflections_{i}.refl") for i in range(4)]
++    parser = ArgumentParser(
++        phil=phil_scope, read_reflections=True, read_experiments=True, check_format=False
++    )
++    params, _ = parser.parse_args(
++        args=args + ["significant_clusters.find_small_groups=True"], show_diff_phil=False
++    )
++    reflections, experiments = reflections_and_experiments_from_files(
++        params.input.reflections, params.input.experiments
++    )
++    reflections = parse_multiple_datasets(reflections)
++    experiments, reflections = assign_unique_identifiers(experiments, reflections)
++    matrices = CorrelationMatrix(experiments, reflections, params)
++    matrices.calculate_matrices()
++    assert sorted(len(c.labels) for c in matrices.significant_clusters) == [2, 2]
++    assert not matrices.outliers
++    matrices.convert_to_html_json()
++
++
+ def test_min_coherence_scales_with_group_size():
+     # five data sets with a coherence of about 0.03, only about twice the strongest structure
+     # inside the varying majority: reported because the threshold for a group of five is
+-- 
+2.54.0 (Apple Git-157)
+

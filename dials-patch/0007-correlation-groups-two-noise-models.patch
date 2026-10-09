@@ -1,0 +1,163 @@
+From 55152990ea9477f2d9ace632dd916e01b6021f89 Mon Sep 17 00:00:00 2001
+From: Philipp Bogdan <174341097+philippbogdan@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 04:30:06 +0100
+Subject: [PATCH] correlation groups: noise_model=both (default): the detector
+ run with the analytic noise and with the bootstrap, groups combined
+
+The two noise models rank pairs differently: the bootstrap over reflections discounts
+correlations that rest on a few strong reflections (two crystals of one population sharing a
+handful of strong spots), the analytic error does not, while the analytic error is the better
+calibrated of the two where pairs share few reflections. Each finds groups the other misses;
+combine_groups (tested) reports the groups found with the analytic noise and adds those found
+with the bootstrap that share no data set with them.
+---
+ src/dials/algorithms/correlation/analysis.py | 56 +++++++++++++-------
+ src/dials/algorithms/correlation/groups.py   | 23 ++++++++
+ tests/algorithms/correlation/test_groups.py  | 13 +++++
+ 3 files changed, 73 insertions(+), 19 deletions(-)
+
+diff --git a/src/dials/algorithms/correlation/analysis.py b/src/dials/algorithms/correlation/analysis.py
+index 601c1e7..d599efd 100644
+--- a/src/dials/algorithms/correlation/analysis.py
++++ b/src/dials/algorithms/correlation/analysis.py
+@@ -87,12 +87,18 @@
+       .type = float(value_min=0, value_max=1)
+       .help = "Largest p-value against counting noise for a group of two data sets."
+       .optional = True
+-    noise_model = *analytic bootstrap
++    min_usable_pairs = 3
++      .type = int(value_min=0)
++      .help = "Data sets with fewer correlations that have an error are not judged."
++    noise_model = analytic bootstrap *both
+       .type = choice
+       .help = "Counting noise of the pairwise correlations: analytic, the large-sample error"
+-              "of Fisher's z with each pair's effective number of reflections; or a"
+-              "bootstrap over reflections (slower, and it overstates the noise where pairs"
+-              "share few reflections)."
++              "of Fisher's z with each pair's effective number of reflections; bootstrap,"
++              "the reflections redrawn (slower; it overstates the noise where pairs share few"
++              "reflections, and discounts correlations that rest on a few strong ones); both:"
++              "the detector run with each, the groups found with the bootstrap added where"
++              "they share no data set with those found with the analytic noise (pairs need"
++              "pair_significance with the analytic noise only)."
+     n_replicates = 100
+       .type = int(value_min=10)
+       .help = "Counting-noise replicates of the correlation matrix."
+@@ -865,6 +871,7 @@ def find_small_groups(self):
+         """
+         from dials.algorithms.correlation.groups import (
+             GroupDetection,
++            combine_groups,
+             dense_from_target,
+             noise_replicates,
+             take_out_groups,
+@@ -882,21 +889,32 @@ def find_small_groups(self):
+         y, v, m = dense_from_target(target)
+         rij = np.array(target.rij_matrix, dtype=np.float64)
+         np.fill_diagonal(rij, 0.0)
+-        deltas = noise_replicates(
+-            y, v, m, rij, model=gp.noise_model, n_replicates=gp.n_replicates, seed=gp.seed
+-        )
+-        detection = GroupDetection(
+-            rij,
+-            np.array(target.wij_matrix, dtype=np.float64),
+-            deltas,
+-            significance=gp.significance,
+-            separation_ratio=gp.separation_ratio,
+-            min_population=gp.min_population,
+-            min_coherence=gp.min_coherence,
+-            pair_significance=gp.pair_significance,
+-        )
+-        groups = sorted(detection.run(), key=len, reverse=True)
+-        for step in detection.log:
++        wij = np.array(target.wij_matrix, dtype=np.float64)
++        models = ("analytic", "bootstrap") if gp.noise_model == "both" else (gp.noise_model,)
++        runs = []
++        for model in models:
++            deltas = noise_replicates(
++                y, v, m, rij, model=model, n_replicates=gp.n_replicates, seed=gp.seed
++            )
++            pairs = gp.pair_significance if model == "analytic" else None
++            runs.append(
++                GroupDetection(
++                    rij,
++                    wij,
++                    deltas,
++                    significance=gp.significance,
++                    separation_ratio=gp.separation_ratio,
++                    min_population=gp.min_population,
++                    min_coherence=gp.min_coherence,
++                    pair_significance=pairs,
++                    min_usable_pairs=gp.min_usable_pairs if model == "analytic" else 0,
++                )
++            )
++        found = [d.run() for d in runs]
++        groups = found[0] if len(found) == 1 else combine_groups(found[0], found[1], len(rij))
++        groups = sorted(groups, key=len, reverse=True)
++        detection = runs[0]
++        for step in [s for d in runs for s in d.log]:
+             logger.info(
+                 "  %(n)i data sets: candidate group of %(size)i, p = %(p).2g, coherence "
+                 "%(coherence).4f, strongest structure inside the rest %(decoy).4f, "
+diff --git a/src/dials/algorithms/correlation/groups.py b/src/dials/algorithms/correlation/groups.py
+index dbf5811..6c9acd2 100644
+--- a/src/dials/algorithms/correlation/groups.py
++++ b/src/dials/algorithms/correlation/groups.py
+@@ -492,3 +492,26 @@ def take_out_groups(labels, groups):
+             new[members] = k
+             k += 1
+     return new
++
++
++def combine_groups(first, second, n):
++    """Populations from two detector runs on the same n data sets (e.g. the two noise
++    models): the groups the first reports (every group but its background population, the
++    largest when it holds more than half of the data sets), then those of the second that
++    share no data set with them; the remaining data sets are the background."""
++
++    def reported(groups):
++        groups = sorted((np.asarray(g) for g in groups), key=len, reverse=True)
++        if len(groups) <= 1:
++            return []
++        return groups[1:] if 2 * len(groups[0]) > n else groups
++
++    out = reported(first)
++    taken = {int(i) for g in out for i in g}
++    for g in reported(second):
++        members = {int(i) for i in g}
++        if not members & taken:
++            out.append(np.asarray(g))
++            taken |= members
++    rest = np.array(sorted(set(range(n)) - taken), dtype=int)
++    return ([rest] if len(rest) else []) + out
+diff --git a/tests/algorithms/correlation/test_groups.py b/tests/algorithms/correlation/test_groups.py
+index 16c318f..453d270 100644
+--- a/tests/algorithms/correlation/test_groups.py
++++ b/tests/algorithms/correlation/test_groups.py
+@@ -13,6 +13,7 @@
+     bootstrap_replicates,
+     dense_from_target,
+     effective_sizes,
++    combine_groups,
+     noise_replicates,
+     rank1_fit,
+     take_out_groups,
+@@ -265,3 +266,15 @@ def test_take_out_groups():
+     assert take_out_groups([0, 0, 0, -1], [[0, 1], [2, 3]]).tolist() == [0, 0, 1, 1]
+     # one group: the OPTICS labels stand
+     assert take_out_groups([0, 0, 1, 1], [[0, 1, 2, 3]]).tolist() == [0, 0, 1, 1]
++
++
++def test_combine_groups():
++    # the first run reports a pair; the second a triple elsewhere and a group overlapping the
++    # pair: the triple is added, the overlapping group is not, the rest is the background
++    first = [list(range(2, 12)), [0, 1]]
++    second = [[0, 1, 2, 3, 4, 5, 9, 10, 11], [6, 7, 8], [1, 2]]
++    assert sorted(sorted(int(i) for i in g) for g in combine_groups(first, second, 12)) == [
++        [0, 1], [2, 3, 4, 5, 9, 10, 11], [6, 7, 8]]
++    # nothing reported by either: one population
++    assert [sorted(g.tolist()) for g in combine_groups([list(range(6))], [list(range(6))], 6)] == [
++        list(range(6))]
+-- 
+2.54.0 (Apple Git-157)
+

@@ -1,0 +1,198 @@
+{%- set P = n.primary -%}
+{%- set C = 'cryo' -%}
+{%- set R = 'rt' -%}
+{%- set have_rt = (R ~ '|' ~ P) in n -%}
+{%- set tc_today = totals(n, C, 'today') -%}{%- set tc_p = totals(n, C, P) -%}
+{%- set tr_today = totals(n, R, 'today') if (R ~ '|today') in n else none -%}{%- set tr_p = totals(n, R, P) if have_rt else none -%}
+{%- set mc = miss_totals(n, C, P) -%}{%- set mr = miss_totals(n, R, P) if have_rt else {} -%}
+{%- set gc = gap_cells(n, C, P) -%}{%- set gr = gap_cells(n, R, P) if have_rt else ['room temperature not measured'] -%}
+# COMPLETE
+
+Status of the goal (GOAL.md, "Done"), measured from the results files of commit `{{ n.commit }}`
+(`python -m cf.report && python -m cf.render`; `bash reproduce.sh` regenerates every number from the
+raw data). Each line gives the measurement and the reference it is checked against; details in
+`FINDINGS.md` (claims and evidence) and `REPORT.md` (criteria before and after, failures, open items).
+
+## 1. Today's DIALS reproduces the published separation
+
+- 36 cryo crystals, `xia2.multiplex` with every default: {{ n.fidelity.multiplex_cryo_full.n_clusters }} clusters
+  ({{ n.fidelity.multiplex_cryo_full.clusters|clusters }}), {{ n.fidelity.multiplex_cryo_full.n_outliers }}
+  outliers, {{ n.fidelity.multiplex_cryo_full.dims }} dimensions, resolution filter {{ n.fidelity.multiplex_cryo_full.resolution_filter }} A;
+  the paper: three pure clusters, no outliers, three dimensions, 1.26 A. **Reproduced.**
+- Cut to 1.0 and 0.8 degrees per crystal: {{ n.fidelity.multiplex_cryo_10_images.n_clusters }} and
+  {{ n.fidelity.multiplex_cryo_8_images.n_clusters }} species-pure clusters with {{ n.fidelity.multiplex_cryo_10_images.n_outliers }}
+  and {{ n.fidelity.multiplex_cryo_8_images.n_outliers }} outlier; the paper: separated down to 0.8 degrees. Reproduced, one
+  porcine crystal an outlier at 0.8 degrees.
+- The paper's own cosym coordinates shipped with DIALS: cryo labels reproduced exactly; the 215
+  room-temperature data sets give 83, 82, 28 and 22 outliers against the published 83, 85, 28 and 19
+  (three data sets become outliers under today's defaults, which changed after the paper).
+
+## 2. Deliverable 1: the limit of today's DIALS on both public collections
+
+k90 of today's DIALS (crystals; fraction of the trial), per species pair and data per crystal:
+
+Cryo:
+
+{{ k90_table(n, C, 'today') }}
+
+{% if (R ~ '|today') in n -%}
+Room temperature:
+
+{{ k90_table(n, R, 'today') }}
+{%- endif %}
+
+False-group rate in single-population data: cryo {{ ci(*tc_today.false_groups) }}{% if tr_today %}, room temperature
+{{ ci(*tr_today.false_groups) }}{% endif %}. Minorities of 2-4 crystals are never reported, at any data amount.
+
+## 3. Deliverable 2: the cause, by evidence
+
+Replaying today's DIALS from every trial's own correlation matrix with one stage changed: lowering the
+OPTICS minimum-samples floor (5) to 2 makes it report minorities of 2-4 at full data
+({{ n[C ~ '|cause'].floor2.detection.values()|list|length and '' }}cryo k=2-4 at 10 degrees:
+{% set d = n[C ~ '|cause'] %}{{ (d.default.detection.get('10|2', [0,0])[0] + d.default.detection.get('10|3', [0,0])[0] + d.default.detection.get('10|4', [0,0])[0]) }} found with the floor,
+{{ (d.floor2.detection.get('10|2', [0,0])[0] + d.floor2.detection.get('10|3', [0,0])[0] + d.floor2.detection.get('10|4', [0,0])[0]) }}
+without it, of {{ (d.default.detection.get('10|2', [0,0])[1] + d.default.detection.get('10|3', [0,0])[1] + d.default.detection.get('10|4', [0,0])[1]) }}),
+and groups in single-population data ({{ d.floor2.false_groups.values()|map('first')|sum }} of
+{{ d.floor2.false_groups.values()|map('last')|sum }} trials against {{ d.default.false_groups.values()|map('first')|sum }}); changing the number of
+dimensions, the min_samples search or the scaling of the coordinates changes nothing. The minority is
+already separated in the coordinates OPTICS receives (cryo, full data: median silhouette of the true
+split {{ '%.2f'|format(d.separability['10|2'].silhouette_median) }}-{{ '%.2f'|format(d.separability['10|4'].silhouette_median) }},
+every minority crystal's nearest neighbour a minority crystal in {{ '%.0f'|format(100 * d.separability['10|3'].nn_pure) }}-{{ '%.0f'|format(100 * d.separability['10|4'].nn_pure) }}% of draws).
+The cause is OPTICS's minimum cluster size: density clustering has no measure of how far a group stands
+out of the noise, so its floor is what keeps noise and structure inside one species from being reported,
+and it loses every group below it.{% set dr = n.get(R ~ '|cause') %}{% if dr and dr.get('floor2') %} Room temperature, the same (60 degrees, `FINDINGS.md` F3):
+{{ dr.default.detection.get('60|2', [0,0])[0] + dr.default.detection.get('60|3', [0,0])[0] + dr.default.detection.get('60|4', [0,0])[0] }} of
+{{ dr.default.detection.get('60|2', [0,0])[1] + dr.default.detection.get('60|3', [0,0])[1] + dr.default.detection.get('60|4', [0,0])[1] }} minorities of 2-4 found with the floor,
+{{ dr.floor2.detection.get('60|2', [0,0])[0] + dr.floor2.detection.get('60|3', [0,0])[0] + dr.floor2.detection.get('60|4', [0,0])[0] }} without it, and groups in
+{{ dr.floor2.false_groups.values()|map('first')|sum }} of {{ dr.floor2.false_groups.values()|map('last')|sum }} single-population trials against {{ dr.default.false_groups.values()|map('first')|sum }}.{% endif %}
+
+## 4. Deliverable 3: a better procedure, mergeable, with tests
+{%- set V6 = n.preregistered %}{% set V7 = n.floor_only %}{% set V8 = n.precise %}{% set V9 = n.snr %}{% set J = n.judged %}{% set H = n.get('heldout') %}
+
+The change: `dials-patch/0001-0015` against DIALS v3.30.1 (`dials.algorithms.correlation.groups`, a
+`significant_clusters.find_small_groups` option of `dials.correlation_matrix` and so of `xia2.multiplex`),
+tests in `tests/algorithms/correlation/test_groups.py`: {{ n.tests.dials_patch.get('passed', '(not yet run)') }} passed with DIALS's existing
+correlation and regression tests{% if n.tests.dials_patch.failed is defined %}, {{ n.tests.dials_patch.failed }} failed{% endif %}; it passes DIALS's own pre-commit checks (ruff).
+{%- set eq = n.equivalence or {} %}{% set e9 = eq.get('groups_v11') %}{% if e9 %} Run end to end on {{ e9.n_run }} sampled trials: {{ e9.dials_errors }}
+failures beyond today's DIALS'; the same clusters as the module on the saved arrays in {{ e9.same_clusters }} of {{ e9.n }}, the
+same outcome in {{ e9.same_outcome }}.{% endif %} {{ n.configurations|length }} configurations were judged, each on data it was not tuned on:
+{% for c in n.configurations %}
+- **{{ c.name }}**{{ ', the change\'s defaults' if c.name == P else '' }} (amendment {{ c.amendment }}, `dials-patch/{{ c.patches }}`): {{ c.does }}.
+{%- endfor %}
+
+{{ V6 }} was judged on room temperature. The others were chosen after its judgement, on both collections; their
+held-out judgement is the third collection (Zenodo 15077303, amendments 19-26): none of its trials ran
+before all of them were frozen.
+
+| | cryo: found | cryo: false groups | room temperature: found | room temperature: false groups | third collection: found | third collection: false groups | median CPU s per trial (cryo / room temperature) |
+|---|---|---|---|---|---|---|---|
+{%- for p in ['today'] + J %}{% if (C ~ '|' ~ p) in n %}
+{%- set tc = totals(n, C, p) %}{% set tr = totals(n, R, p) if (R ~ '|' ~ p) in n else none %}{% set th = H.procedures.get(p) if H else none %}
+| {{ p }} | {{ ci(*tc.found) }} | {{ ci(*tc.false_groups) }} | {{ ci(*tr.found) if tr else '-' }} | {{ ci(*tr.false_groups) if tr else '-' }} | {{ ci(*th.found[:2]) if th else '-' }} | {{ ci(*th.false_groups[:2]) if th else '-' }} | {{ '%.2f'|format(n[C ~ '|' ~ p].cost.median) }} / {{ '%.2f'|format(n[R ~ '|' ~ p].cost.median) if (R ~ '|' ~ p) in n and n[R ~ '|' ~ p].cost.median is not none else '-' }} |
+{%- endif %}{% endfor %}
+
+{% set pv6 = n.get(R ~ '|paired_false_groups_' ~ V6) -%}
+{%- if pv6 %}**{{ V6 }}, held out on room temperature: fails.** It reports a group in {{ pv6.only_b }} single-population trials
+where today's DIALS reports none (none the other way round): it raises the false-group rate.{% endif %}
+{%- for p in J[1:] %}{% set hp = H.procedures.get(p) if H else none %}{% if hp and hp.paired %}
+**{{ p }}, held out on the third collection: {{ 'does not raise the false-group rate' if hp.paired.only_b == 0 else 'raises the false-group rate' }}**
+({{ hp.paired.only_b }} single-population trial(s) with a group where today's DIALS has none, {{ hp.paired.only_a }} the other way round) and finds
+{{ hp.found[0] - H.procedures.today.found[0] }} more of its {{ hp.found[1] }} minorities than today's DIALS.
+{%- endif %}{% endfor %}
+{%- set h6 = H.procedures.get(V6) if H else none %}{% if h6 and h6.paired %} {{ V6 }} there: {{ h6.paired.only_b }} trial(s) with a group where today's DIALS has
+none, {{ h6.found[0] - H.procedures.today.found[0] }} more minorities.{% endif %}
+{%- if not H or not H.procedures.get(P) %} The third collection's judgement is not yet measured.{% endif %}
+
+## 5. Deliverable 4
+
+`FINDINGS.md`, `REPORT.md`, this file; `bash reproduce.sh` (one command, staged; `bash reproduce.sh report`
+re-derives every number from the results files).
+
+## 6. The smallest detectable group and its cause, for today's DIALS and {{ P }}, both collections
+{%- set J = n.judged %}
+
+k90 (crystals; fraction of the trial), today's DIALS and the {{ n.judged|length }} judged configurations:
+
+Cryo:
+
+{{ k90_compare3(n, C, ['today'] + (J|select('in', present(n, C))|list)) }}
+
+Room temperature:
+
+{{ k90_compare3(n, R, ['today'] + (J|select('in', present(n, R))|list)) }}
+{% if H %}
+The third collection (eight crystals per species; held out):
+
+{{ heldout_k90(n) }}
+{% endif %}
+Cause, for today's DIALS: section 3. For the judged configurations: every minority they miss, classified by the
+measurement that settles it (`cf/limits3.py`; `FINDINGS.md` F6), per collection:
+
+| procedure | collection | found | counting noise | structure inside one species | membership not resolved | noise known only from repeats | not classified | procedure |
+|---|---|---|---|---|---|---|---|---|
+{%- for coll in (C, R) %}{% for p in J %}{% if (coll ~ '|' ~ p) in n %}{% set m = miss_totals(n, coll, p) %}
+| {{ p }} | {{ coll }} | {{ m.get('found', 0) }} | {{ m.get('counting noise', 0) }} | {{ m.get('structure inside one species', 0) }} | {{ m.get('membership not resolved', 0) }} | {{ m.get('noise known only from repeats', 0) }} | {{ m.get('not classified', 0) }} | {{ m.get('procedure', 0) }} |
+{%- endif %}{% endfor %}{% endfor %}
+
+and across the collections (amendment 18: one configuration for every sample, so a group of one species
+in either collection's single-population data counts as structure):
+
+| procedure | collection | found | counting noise | structure inside one species | membership not resolved | noise known only from repeats | not classified | procedure |
+|---|---|---|---|---|---|---|---|---|
+{%- for coll in (C, R) %}{% for p in J %}{% if (coll ~ '|' ~ p) in n %}{% set m = miss_totals(n, coll, p, key='misses_cross') %}
+| {{ p }} | {{ coll }} | {{ m.get('found', 0) }} | {{ m.get('counting noise', 0) }} | {{ m.get('structure inside one species', 0) }} | {{ m.get('membership not resolved', 0) }} | {{ m.get('noise known only from repeats', 0) }} | {{ m.get('not classified', 0) }} | {{ m.get('procedure', 0) }} |
+{%- endif %}{% endfor %}{% endfor %}
+
+## 7. Every remaining limit belongs to the problem itself
+{%- set cc = n.get(C ~ '|classified', [0, 1]) %}{% set cr = n.get(R ~ '|classified', [0, 1]) %}
+{%- set gcp = gap_cells(n, C, P) %}{% set grp = gap_cells(n, R, P) if (R ~ '|' ~ P) in n else ['not measured'] %}
+{%- set gcx = gap_cells(n, C, P, cross=True) %}{% set grx = gap_cells(n, R, P, cross=True) if (R ~ '|' ~ P) in n else ['not measured'] %}
+
+**Per cell** (the smallest detectable group, k90, of each species pair and data amount), {{ P }}'s k90 against
+the k90 the data allow with the noise one experiment can know (`FINDINGS.md` F6):
+
+- across the collections (one configuration for every sample, amendment 18): cells where {{ P }}'s is
+  higher: cryo {{ gcx|join('; ') or 'none' }}; room temperature {{ grx|join('; ') or 'none' }};
+- per collection (a procedure told which kind of sample it has): cryo {{ gcp|join('; ') or 'none' }}; room
+  temperature {{ grp|join('; ') or 'none' }}.
+
+How much this depends on the measurement (`FINDINGS.md` F6): under amendment 13's rule, without the
+two standard errors' tolerance in the structure test, on amplitude correlations, or on either matrix,
+the k90 the data allow (per collection) moves in these cells only, each on minorities that stand out at p
+close to the test's level:
+{% for coll in (C, R) %}{% set rb = n.get(coll ~ '|limit_robustness') %}{% if rb %}
+{%- set moved = [] %}{% for key, v in rb.k90.items() %}{% if v.values()|unique|list|length > 1 %}{% set _ = moved.append(key) %}{% endif %}{% endfor %}
+- {{ coll }}: {% for key in moved|sort %}{% set v = rb.k90[key] %}{{ PAIR_NAMES[key.split('|')[1]] }} {{ key.split('|')[2] }} deg (the rule {{ kfmt(v.a14, coll) }}, amendment 13 {{ kfmt(v.a13, coll) }}, no tolerance {{ kfmt(v.tol0, coll) }}, amplitudes {{ kfmt(v.amp, coll) }}, either matrix {{ kfmt(v.either, coll) }}){% if not loop.last %}; {% endif %}{% else %}none{% endfor %}
+{%- endif %}{% endfor %}
+
+**Per minority**: the minorities {{ P }} misses that no measurement puts in the data, across the
+collections (with the p-value of the group that makes each separable, noise from repeats / noise one
+experiment can know; whether its detector examined anything; the frozen procedures that do find it):
+{% for coll in (C, R) %}{% set ux = n.get(coll ~ '|unexplained_cross') %}{% if ux is not none %}
+- {{ coll }}: {{ ux|length }} of {{ totals(n, coll, P).found[1] }}{% for u in ux[:30] %}
+  - `{{ u.id }}`: {{ u.k }} {{ u.minority }} among {{ u.majority }}, {{ u.w }} degree{{ '' if u.w == 1 else 's' }}; separable as a group of {{ u.unit_size }} holding {{ u.unit_minority }} of them, p {{ '%.1g'|format(u.p_noise) if u.p_noise is not none else '-' }} / {{ '%.1g'|format(u.p_model) if u.p_model is not none else '-' }}; {{ 'detector idle' if u.detector_idle else 'detector active' }}; found by {{ u.found_by|join(', ') or 'no procedure tried' }}{% endfor %}{% if ux|length > 30 %}
+  - ... ({{ ux|length - 30 }} more in `results/report/numbers.json`){% endif %}
+{%- endif %}{% endfor %}
+{% set H = n.get('heldout') %}{% set hp = H.procedures.get(P) if H else none %}
+{%- set held = hp and hp.paired and hp.paired.only_b == 0 %}
+{% if cc[0] < cc[1] or cr[0] < cr[1] -%}
+**Verdict: not yet measured.** The limits are classified for {{ cc[0] }} of {{ cc[1] }} cryo and {{ cr[0] }} of {{ cr[1] }}
+room-temperature minorities.
+{%- elif not hp or not hp.paired -%}
+**Verdict: not yet measured.** {{ P }}'s held-out judgement on the third collection is not yet measured.
+{%- elif not held -%}
+**Verdict: does not hold.** {{ P }} raises the false-group rate on the third collection, its held-out judgement
+(section 4); by amendment 26 the change is proposed with the latest configuration that does not.
+{%- elif not gcx and not grx and (R ~ '|' ~ P) in n -%}
+{%- set h6 = H.procedures.get(V6) if H else none %}
+**Verdict: holds.** {{ P }} keeps today's false-group rate on the collection it was not tuned on{% if h6 and h6.paired and h6.paired.only_b == 0 %} (a weak test of
+false groups: {{ V6 }}, which raised the rate on room temperature, reports no group there either, `FINDINGS.md`
+F10){% endif %}, and across the collections, in every cell, its detection limit is the limit the data allow one
+configuration for every sample. Per collection (a procedure told which kind of sample it has), it gives up the cells listed above:
+smaller groups separable from the structure of that collection's own crystals but not from that of the
+other's. The individual minorities listed above are separable in the data but missed by {{ P }}; they are open
+(`REPORT.md`).
+{%- else -%}
+**Verdict: does not hold.** The cells listed above are limits of the procedure, not of the data
+(`REPORT.md`, "What remains open").
+{%- endif %}

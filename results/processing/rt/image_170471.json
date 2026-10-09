@@ -1,0 +1,36 @@
+{
+ "collection": "rt",
+ "crystal": "image_170471",
+ "species": "porcine",
+ "dials_version": "DIALS 3.30",
+ "n_images": 600,
+ "oscillation": [
+  -29.999999999999996,
+  0.10000000149011545
+ ],
+ "image_range": [
+  1,
+  600
+ ],
+ "unit_cell": [
+  67.82538427496414,
+  67.81699287917195,
+  67.81035311270136,
+  109.44766477405425,
+  109.49046973899785,
+  109.48356936932643
+ ],
+ "space_group": "P 1",
+ "n_strong": 8137,
+ "n_indexed": 6560,
+ "n_integrated_prf": 57346,
+ "n_integrated_sum": 57568,
+ "n_reflections": 59159,
+ "wavelength": 0.7749043005814167,
+ "index_retry": false,
+ "rmsd_xy_phi": [
+  0.18484,
+  0.26891,
+  0.080246
+ ]
+}

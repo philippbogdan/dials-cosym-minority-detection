@@ -1,0 +1,90 @@
+From cc35b13376aad70b2ff580b11ac9cf0449719fd6 Mon Sep 17 00:00:00 2001
+From: Philipp Bogdan <174341097+philippbogdan@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 11:58:15 +0100
+Subject: [PATCH 9/9] correlation groups: bootstrap replicates by weighted sums
+ (one matrix product per block of pairs; the same matrices to rounding, 10-15
+ times faster); test against the recomputed matrices
+
+---
+ src/dials/algorithms/correlation/groups.py  | 36 ++++++++++++++++++---
+ tests/algorithms/correlation/test_groups.py | 14 ++++++++
+ 2 files changed, 45 insertions(+), 5 deletions(-)
+
+diff --git a/src/dials/algorithms/correlation/groups.py b/src/dials/algorithms/correlation/groups.py
+index 6c9acd2..1ff555e 100644
+--- a/src/dials/algorithms/correlation/groups.py
++++ b/src/dials/algorithms/correlation/groups.py
+@@ -110,14 +110,40 @@ def weighted_cc_matrix(y, v, m, weights=None, min_pairs=3):
+     return r + r.T
+ 
+ 
+-def bootstrap_replicates(y, v, m, n_bootstrap=100, seed=0):
++def bootstrap_replicates(y, v, m, n_bootstrap=100, seed=0, min_pairs=3, chunk=64):
+     """Correlation matrices recomputed with the reflections redrawn (Poisson weights, the
+-    same for all data sets), minus the unweighted matrix: counting noise only."""
++    same for all data sets), minus the unweighted matrix: counting noise only.
++
++    Every pair's weighted correlation needs six sums over its shared reflections (of w, wx,
++    wy, wxy, wx^2 and wy^2, w = 1 / (v_i + v_j)), each linear in the reflections' bootstrap
++    weights, so all replicates come from one matrix product per block of pairs (the same
++    values as weighted_cc_matrix with each replicate's weights, to rounding)."""
+     rng = np.random.default_rng(seed)
+     r0 = weighted_cc_matrix(y, v, m)
+-    out = np.empty((n_bootstrap,) + r0.shape)
+-    for b in range(n_bootstrap):
+-        out[b] = weighted_cc_matrix(y, v, m, rng.poisson(1.0, y.shape[1]))
++    n = y.shape[0]
++    wt = rng.poisson(1.0, (n_bootstrap, y.shape[1])).astype(np.float64)
++    drawn = (wt > 0).astype(np.float64)
++    first, second = np.triu_indices(n, 1)
++    out = np.zeros((n_bootstrap, n, n))
++    for start in range(0, len(first), chunk):
++        a, b = first[start : start + chunk], second[start : start + chunk]
++        mm = m[a] & m[b]
++        with np.errstate(divide="ignore", invalid="ignore"):
++            c = np.where(mm, 1.0 / (v[a] + v[b]), 0.0)
++        x, z = y[a], y[b]
++        terms = np.stack([c, c * x, c * z, c * x * z, c * x * x, c * z * z])
++        sums = (terms.reshape(-1, terms.shape[2]) @ wt.T).reshape(6, len(a), n_bootstrap)
++        sw, swx, swy, swxy, swxx, swyy = sums.transpose(0, 2, 1)
++        count = drawn @ mm.T.astype(np.float64)
++        with np.errstate(divide="ignore", invalid="ignore"):
++            xbar, ybar = swx / sw, swy / sw
++            sxy = swxy / sw - xbar * ybar
++            sx = swxx / sw - xbar * xbar
++            syy = swyy / sw - ybar * ybar
++            cc = sxy / np.sqrt(sx * syy)
++        ok = (count >= min_pairs) & (sx > 0) & (syy > 0) & np.isfinite(cc)
++        out[:, a, b] = np.where(ok, cc, 0.0)
++        out[:, b, a] = out[:, a, b]
+     return out - r0[None]
+ 
+ 
+diff --git a/tests/algorithms/correlation/test_groups.py b/tests/algorithms/correlation/test_groups.py
+index c2ea253..345f15e 100644
+--- a/tests/algorithms/correlation/test_groups.py
++++ b/tests/algorithms/correlation/test_groups.py
+@@ -273,6 +273,20 @@ def test_analytic_noise_is_the_error_of_fishers_z():
+     assert not analytic_replicates(r, n_eff, n_replicates=5)[:, 0, 1].any()
+ 
+ 
++def test_bootstrap_replicates_equal_recomputed_matrices():
++    # each replicate is the weighted correlation matrix recomputed with that replicate's
++    # Poisson weights on the reflections
++    y, v, m = synthetic([6, 3], shift=0.4, nref=300, seed=4)
++    m[0, 150:] = False
++    m[7, :297] = False  # shares three reflections with the others at most
++    reps = bootstrap_replicates(y, v, m, n_bootstrap=7, seed=5)
++    rng = np.random.default_rng(5)
++    r0 = weighted_cc_matrix(y, v, m)
++    for b in range(7):
++        expected = weighted_cc_matrix(y, v, m, rng.poisson(1.0, y.shape[1])) - r0
++        assert np.allclose(reps[b], expected, rtol=0, atol=1e-10)
++
++
+ def test_bootstrap_noise_model():
+     y, v, m = synthetic([12, 2], shift=0.4, seed=3)
+     assert detect(y, v, m, noise_model="bootstrap") == [list(range(12)), [12, 13]]
+-- 
+2.54.0 (Apple Git-157)
+

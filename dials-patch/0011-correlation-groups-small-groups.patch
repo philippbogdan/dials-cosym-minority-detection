@@ -1,0 +1,159 @@
+From cc7523826f4f0f4b787bf6f14529cdcf8387d575 Mon Sep 17 00:00:00 2001
+From: Philipp Bogdan <174341097+philippbogdan@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 15:50:41 +0100
+Subject: [PATCH] correlation groups: small_groups (default max_se 0.002, z 2,
+ min_coherence 0.04, min_ratio 2): a group smaller than min_group_size is
+ reported when its coherence is precisely measured, clearly above the floor
+ and separated from the rest's structure; group_evidence; test
+
+---
+ src/dials/algorithms/correlation/analysis.py | 29 ++++++++++++++++-
+ src/dials/algorithms/correlation/groups.py   | 33 +++++++++++++++++---
+ tests/algorithms/correlation/test_groups.py  | 22 +++++++++++++
+ 3 files changed, 79 insertions(+), 5 deletions(-)
+
+diff --git a/src/dials/algorithms/correlation/analysis.py b/src/dials/algorithms/correlation/analysis.py
+index 05bfe37..6789eda 100644
+--- a/src/dials/algorithms/correlation/analysis.py
++++ b/src/dials/algorithms/correlation/analysis.py
+@@ -90,6 +90,21 @@
+     min_usable_pairs = 3
+       .type = int(value_min=0)
+       .help = "Data sets with fewer correlations that have an error are not judged."
++    small_groups {
++      max_se = 0.002
++        .type = float(value_min=0)
++        .help = "A group smaller than min_group_size is reported when its coherence is measured"
++                "this precisely (standard error over the counting-noise replicates) ..."
++      z = 2
++        .type = float(value_min=0)
++        .help = "... and stands this many standard errors above min_coherence * 2 / k ..."
++      min_coherence = 0.04
++        .type = float(value_min=0)
++      min_ratio = 2
++        .type = float(value_min=0)
++        .help = "... and is this many times more coherent than the strongest structure of its"
++                "size inside the rest. max_se = 0: never."
++    }
+     min_group_size = 5
+       .type = int(value_min=2)
+       .help = "Groups smaller than this are not taken out of the OPTICS clusters. The default"
+@@ -881,6 +896,7 @@ def find_small_groups(self):
+         from dials.algorithms.correlation.groups import (
+             GroupDetection,
+             apply_min_group_size,
++            group_evidence,
+             combine_groups,
+             dense_from_target,
+             noise_replicates,
+@@ -922,7 +938,18 @@ def find_small_groups(self):
+             )
+         found = [d.run() for d in runs]
+         groups = found[0] if len(found) == 1 else combine_groups(found[0], found[1], len(rij))
+-        groups = apply_min_group_size(groups, gp.min_group_size)
++        sg = gp.small_groups
++        analytic = noise_replicates(y, v, m, rij, model="analytic", n_replicates=gp.n_replicates, seed=gp.seed)
++
++        def precise(group):
++            if sg.max_se <= 0:
++                return False
++            coherence, se, d = group_evidence(rij, wij, analytic, group)
++            k = len(group)
++            return bool(se <= sg.max_se and coherence - sg.z * se >= sg.min_coherence * 2 / k
++                        and (d <= 0 or coherence / d >= sg.min_ratio))
++
++        groups = apply_min_group_size(groups, gp.min_group_size, keep=precise)
+         detection = runs[0]
+         for step in [s for d in runs for s in d.log]:
+             logger.info(
+diff --git a/src/dials/algorithms/correlation/groups.py b/src/dials/algorithms/correlation/groups.py
+index 77c8aef..409345c 100644
+--- a/src/dials/algorithms/correlation/groups.py
++++ b/src/dials/algorithms/correlation/groups.py
+@@ -520,14 +520,39 @@ def take_out_groups(labels, groups):
+     return new
+ 
+ 
+-def apply_min_group_size(groups, min_group_size):
++def group_evidence(r, w, deltas, members):
++    """How precisely a group stands out: its coherence (mean rank-1 residual within), the standard
++    error of that mean over the counting-noise replicates (each refitted), and the strongest
++    structure of its size inside the rest (the detector's decoy)."""
++    r = np.array(r, dtype=float)
++    np.fill_diagonal(r, 0.0)
++    w = np.asarray(w, dtype=float)
++    members = np.asarray(members)
++    e, _ = _residuals(r, w)
++    valid = (w > 0) & np.any(np.asarray(deltas) != 0, axis=0)
++    np.fill_diagonal(valid, False)
++    e = np.where(valid, e, np.nan)
++    reps = []
++    for d in deltas:
++        rb = r + d
++        np.fill_diagonal(rb, 0.0)
++        v = _mean_within(np.where(valid, _residuals(rb, w)[0], np.nan), members)
++        if np.isfinite(v):
++            reps.append(v)
++    rest = np.setdiff1d(np.arange(len(r)), members)
++    coherence = _mean_within(e, members)
++    se = float(np.std(reps)) if len(reps) > 2 else np.inf
++    return coherence, se, decoy(e, [rest], len(members))
++
++
++def apply_min_group_size(groups, min_group_size, keep=None):
+     """The populations with every group smaller than min_group_size returned to the background (the
+-    largest population), largest first."""
++    largest population), largest first; `keep(group)` can admit a smaller group nonetheless."""
+     groups = sorted((np.asarray(g) for g in groups), key=len, reverse=True)
+     if len(groups) <= 1:
+         return groups
+-    kept = [g for g in groups[1:] if len(g) >= min_group_size]
+-    small = [g for g in groups[1:] if len(g) < min_group_size]
++    kept = [g for g in groups[1:] if len(g) >= min_group_size or (keep is not None and keep(g))]
++    small = [g for g in groups[1:] if not (len(g) >= min_group_size or (keep is not None and keep(g)))]
+     background = np.sort(np.concatenate([groups[0]] + small)) if small else groups[0]
+     return sorted([background] + kept, key=len, reverse=True)
+ 
+diff --git a/tests/algorithms/correlation/test_groups.py b/tests/algorithms/correlation/test_groups.py
+index 8c8411e..26a4252 100644
+--- a/tests/algorithms/correlation/test_groups.py
++++ b/tests/algorithms/correlation/test_groups.py
+@@ -11,6 +11,7 @@
+     GroupDetection,
+     analytic_replicates,
+     apply_min_group_size,
++    group_evidence,
+     bootstrap_replicates,
+     dense_from_target,
+     effective_sizes,
+@@ -340,6 +341,27 @@ def test_min_group_size():
+     ]
+ 
+ 
++def test_small_groups_admitted_when_precise():
++    # a clear pair (another population) is kept below the minimum group size when its coherence is
++    # precisely measured; with no precision allowed it returns to the background
++    y, v, m = synthetic([12, 2], shift=0.4, seed=3)
++    r = weighted_cc_matrix(y, v, m)
++    w = np.ones_like(r)
++    np.fill_diagonal(w, 0)
++    deltas = noise_replicates(y, v, m, r, model="analytic", n_replicates=60, seed=1)
++    groups = GroupDetection(r, w, deltas).run()
++    assert sorted(len(g) for g in groups) == [2, 12]
++    coherence, se, d = group_evidence(r, w, deltas, np.array([12, 13]))
++    assert coherence > 0 and se > 0
++
++    def keep(g, max_se):
++        c, s, dd = group_evidence(r, w, deltas, g)
++        return s <= max_se and c >= 0.04 and (dd <= 0 or c / dd >= 2)
++
++    assert [len(g) for g in apply_min_group_size(groups, 5, keep=lambda g: keep(g, 1.0))] == [12, 2]
++    assert [len(g) for g in apply_min_group_size(groups, 5, keep=lambda g: keep(g, 0.0))] == [14]
++
++
+ def test_combine_groups():
+     # the first run reports a pair; the second a triple elsewhere and a group overlapping the
+     # pair: the triple is added, the overlapping group is not, the rest is the background
+-- 
+2.54.0 (Apple Git-157)
+

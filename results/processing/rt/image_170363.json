@@ -1,0 +1,36 @@
+{
+ "collection": "rt",
+ "crystal": "image_170363",
+ "species": "human",
+ "dials_version": "DIALS 3.30",
+ "n_images": 600,
+ "oscillation": [
+  -29.999999999999996,
+  0.10000000149011545
+ ],
+ "image_range": [
+  1,
+  600
+ ],
+ "unit_cell": [
+  67.84860927241485,
+  67.85589234529041,
+  67.85749779963638,
+  109.47539846196946,
+  109.49114971706776,
+  109.44940623138847
+ ],
+ "space_group": "P 1",
+ "n_strong": 6243,
+ "n_indexed": 5746,
+ "n_integrated_prf": 57485,
+ "n_integrated_sum": 57815,
+ "n_reflections": 59386,
+ "wavelength": 0.7749042134043422,
+ "index_retry": false,
+ "rmsd_xy_phi": [
+  0.18724,
+  0.2555,
+  0.096057
+ ]
+}

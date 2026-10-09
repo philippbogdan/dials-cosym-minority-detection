@@ -1,0 +1,1 @@
+{"proc": "p6u", "alpha": 0.01, "ratio": 3.5, "criterion": "either", "abs_min": 0.03, "noise": "analytic"}

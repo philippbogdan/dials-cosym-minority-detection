@@ -1,0 +1,123 @@
+From 3df8d3563dc2ae1cb3145f69c4a6ae8a906e73e5 Mon Sep 17 00:00:00 2001
+From: Philipp Bogdan <174341097+philippbogdan@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 02:49:39 +0100
+Subject: [PATCH] correlation groups: min_coherence scales as 2/k with the size
+ of the group
+
+The strongest structure inside one population falls about as 1/k with the size of the subset
+(cryogenic insulin data: 0.038 for two crystals, 0.025 for three, 0.012 for five), and so does
+a group's coherence. A threshold of min_coherence for every size missed groups of four to six
+crystals next to a structured majority; min_coherence * 2/k does not, and keeps the margin
+above the structure inside one population at every size. Test added.
+---
+ src/dials/algorithms/correlation/analysis.py |  7 ++++---
+ src/dials/algorithms/correlation/groups.py   | 19 ++++++++++++------
+ tests/algorithms/correlation/test_groups.py  | 21 +++++++++++++++-----
+ 3 files changed, 33 insertions(+), 14 deletions(-)
+
+diff --git a/src/dials/algorithms/correlation/analysis.py b/src/dials/algorithms/correlation/analysis.py
+index 1bfb3fb..216ef16 100644
+--- a/src/dials/algorithms/correlation/analysis.py
++++ b/src/dials/algorithms/correlation/analysis.py
+@@ -79,9 +79,10 @@
+               "is only split from a rest at least this large."
+     min_coherence = 0.05
+       .type = float(value_min=0)
+-      .help = "A significant group whose coherence (mean residual of its pairwise correlations"
+-              "from a single population) is at least this large is reported whatever the"
+-              "structure of the rest. None: judge by separation_ratio alone."
++      .help = "A significant pair of data sets whose coherence (mean residual of its pairwise"
++              "correlation from a single population) is at least this large is reported"
++              "whatever the structure of the rest; for a group of k data sets the threshold is"
++              "min_coherence * 2 / k. None: judge by separation_ratio alone."
+       .optional = True
+     n_bootstrap = 100
+       .type = int(value_min=10)
+diff --git a/src/dials/algorithms/correlation/groups.py b/src/dials/algorithms/correlation/groups.py
+index c52bda0..4ae22ad 100644
+--- a/src/dials/algorithms/correlation/groups.py
++++ b/src/dials/algorithms/correlation/groups.py
+@@ -13,9 +13,12 @@
+    hydration, dose; and real sub-populations exist inside one population), that is its
+    coherence exceeds ``separation_ratio`` times the coherence of the most coherent subset of
+    the same size inside each of those populations (its "decoy"); or its coherence is at
+-   least ``min_coherence`` (correlation units), a difference too large for the internal
+-   structure of one population, which keeps a group visible when the population it is
+-   separated from has strong internal structure of its own.
++   least ``min_coherence`` x 2 / k for a group of k data sets (correlation units), a
++   difference too large for the internal structure of one population, which keeps a group
++   visible when the population it is separated from has strong internal structure of its
++   own. (The strongest structure inside one population falls about as 1 / k with the size
++   of the subset, as does a group's coherence: the rank-1 fit absorbs more of a larger
++   group.)
+ 
+ Coherence: residuals of the correlation matrix from a single population (rank-1 fit, as
+ cosym in one dimension); the coherence of a set is the mean residual over its pairs; a
+@@ -310,8 +313,9 @@ class GroupDetection:
+         min_population: smallest number of data sets in which internal structure can be
+             judged; a group is only split from a rest at least this large.
+         min_coherence: coherence (mean residual within the group, correlation units) at or
+-            above which a significant group is a population of its own whatever the
+-            structure of the rest; None to judge by separation_ratio alone.
++            above which a significant pair of data sets is a population of its own whatever
++            the structure of the rest; for a group of k data sets the threshold is
++            min_coherence x 2 / k. None to judge by separation_ratio alone.
+     """
+ 
+     rij: np.ndarray
+@@ -349,7 +353,10 @@ def _analyse(self, idx, depth):
+         ok = coherence > 0 and (
+             strongest <= 0
+             or coherence > self.separation_ratio * strongest
+-            or (self.min_coherence is not None and coherence >= self.min_coherence)
++            or (
++                self.min_coherence is not None
++                and coherence >= self.min_coherence * 2.0 / len(members)
++            )
+         )
+         self.log.append(dict(depth=depth, n=n, p=s.p, size=len(members), coherence=coherence,
+                              decoy=strongest, accepted=bool(ok)))
+diff --git a/tests/algorithms/correlation/test_groups.py b/tests/algorithms/correlation/test_groups.py
+index ac9c057..3f3ef95 100644
+--- a/tests/algorithms/correlation/test_groups.py
++++ b/tests/algorithms/correlation/test_groups.py
+@@ -108,16 +108,16 @@ def test_strong_continuous_variation_by_separation_alone(seed):
+     assert detect(y, v, m, min_coherence=None) == [list(range(14))]
+ 
+ 
+-def varying_majority_and_pair(minority_shift, heterogeneity=0.1, seed=11):
+-    """Twelve data sets varying continuously along one shared pattern, and two data sets set
+-    apart along a pattern of their own."""
++def varying_majority_and_pair(minority_shift, heterogeneity=0.1, seed=11, n_minority=2):
++    """Twelve data sets varying continuously along one shared pattern, and n_minority data
++    sets set apart along a pattern of their own."""
+     rng = np.random.default_rng(seed)
+     nref = 3000
+     mu = rng.exponential(1.0, nref)
+     shared, minority_pattern = rng.standard_normal((2, nref))
+     rows = [mu + heterogeneity * rng.standard_normal() * shared for _ in range(12)]
+-    rows += [mu + minority_shift * minority_pattern for _ in range(2)]
+-    y = np.array(rows) + 0.2 * rng.standard_normal((14, nref))
++    rows += [mu + minority_shift * minority_pattern for _ in range(n_minority)]
++    y = np.array(rows) + 0.2 * rng.standard_normal((12 + n_minority, nref))
+     v = np.full(y.shape, 0.04)
+     m = rng.random(y.shape) < 0.8
+     return y, v, m
+@@ -178,3 +178,14 @@ def test_find_small_groups_in_correlation_matrix(dials_data, run_in_tmp_path):
+     ) == 4
+     assert len(matrices.significant_clusters) <= 1
+     matrices.convert_to_html_json()
++
++
++def test_min_coherence_scales_with_group_size():
++    # five data sets with a coherence of about 0.03, only about twice the strongest structure
++    # inside the varying majority: reported because the threshold for a group of five is
++    # 0.05 * 2 / 5 = 0.02 (a group's coherence falls about as 1 / size), not by a threshold of
++    # 0.05 for every size
++    y, v, m = varying_majority_and_pair(0.25, n_minority=5)
++    assert detect(y, v, m) == [list(range(12)), list(range(12, 17))]
++    assert detect(y, v, m, min_coherence=None) == [list(range(17))]
++    assert detect(y, v, m, min_coherence=0.05 * 5 / 2) == [list(range(17))]
+-- 
+2.54.0 (Apple Git-157)
+
