@@ -1,0 +1,8 @@
+variant,found,trials,false_groups,single_population_trials
+default,0,78,0,184
+dims+1,0,78,0,184
+dims5,0,78,0,184
+unit,0,78,0,184
+heuristic,0,78,0,184
+floor2,73,78,104,184
+floor2_dims+1,73,78,76,184
