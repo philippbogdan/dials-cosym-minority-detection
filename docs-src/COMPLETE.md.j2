@@ -8,10 +8,12 @@
 {%- set gc = gap_cells(n, C, P) -%}{%- set gr = gap_cells(n, R, P) if have_rt else ['room temperature not measured'] -%}
 # COMPLETE
 
-Status of the goal (GOAL.md, "Done"), measured from the results files of commit `{{ n.commit }}`
+This document checks four deliverables: today's DIALS detection limit, the cause of its misses,
+a tested improvement and reproducible findings. It also checks agreement with the paper and the
+remaining limits. Measurements are from the results files of commit `{{ n.commit }}`
 (`python -m cf.report && python -m cf.render`; `bash reproduce.sh` regenerates every number from the
 raw data). Each line gives the measurement and the reference it is checked against; details in
-`FINDINGS.md` (claims and evidence) and `REPORT.md` (criteria before and after, failures, open items).
+`FINDINGS.md` (claims and evidence, including the held-out judgements and limits).
 
 ## 1. Today's DIALS reproduces the published separation
 
@@ -105,7 +107,7 @@ none, {{ h6.found[0] - H.procedures.today.found[0] }} more minorities.{% endif %
 
 ## 5. Deliverable 4
 
-`FINDINGS.md`, `REPORT.md`, this file; `bash reproduce.sh` (one command, staged; `bash reproduce.sh report`
+`FINDINGS.md` and this file; `bash reproduce.sh` (one command, staged; `bash reproduce.sh report`
 re-derives every number from the results files).
 
 ## 6. The smallest detectable group and its cause, for today's DIALS and {{ P }}, both collections
@@ -191,8 +193,8 @@ F10){% endif %}, and across the collections, in every cell, its detection limit 
 configuration for every sample. Per collection (a procedure told which kind of sample it has), it gives up the cells listed above:
 smaller groups separable from the structure of that collection's own crystals but not from that of the
 other's. The individual minorities listed above are separable in the data but missed by {{ P }}; they are open
-(`REPORT.md`).
+(`FINDINGS.md` F6, F8).
 {%- else -%}
 **Verdict: does not hold.** The cells listed above are limits of the procedure, not of the data
-(`REPORT.md`, "What remains open").
+(`FINDINGS.md` F6).
 {%- endif %}

@@ -1,4 +1,4 @@
-"""Render FINDINGS.md, REPORT.md and COMPLETE.md from docs-src/*.md.j2 and
+"""Render FINDINGS.md and COMPLETE.md from docs-src/*.md.j2 and
 results/report/numbers.json (written by cf.report): every number in those documents comes
 from the results files of one commit, recorded at the top of each document."""
 
@@ -396,7 +396,7 @@ def main():
                heldout_table=heldout_table, heldout_k90=heldout_k90, present=present,
                misses_by_wedge=misses_by_wedge,
                PAIR_NAMES=PAIR_NAMES, WEDGES=WEDGES, FULL=FULL, MAJORITY=MAJORITY)
-    for name in ("FINDINGS.md", "REPORT.md", "COMPLETE.md"):
+    for name in ("FINDINGS.md", "COMPLETE.md"):
         src = ROOT / "docs-src" / f"{name}.j2"
         if src.exists():
             (ROOT / name).write_text(env.get_template(f"{name}.j2").render(**ctx))

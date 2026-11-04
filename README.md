@@ -32,11 +32,11 @@ This supports manual inspection of the labelled plots. Extra dimensions and unit
 
 The [v11 patch](dials-patch/squashed/correlation-find-small-groups.patch) tests groups in the pairwise correlation matrix after OPTICS. It compares their agreement with counting noise and with structure within the remaining crystals, then admits small groups under additional strength and precision checks.
 
-The comparison's whiskers are nominal 95% Clopper-Pearson intervals over trials that reuse crystals, not uncertainty bounds for independent collections. The third collection's false-group test is weak: even v6, which failed on room temperature, reports 0/30 there. The nominal 95% upper bound for 0/30 is about 12%.
+The comparison's whiskers are nominal 95% Clopper-Pearson intervals over trials that reuse crystals, not uncertainty bounds for independent collections. The third collection's false-group test is weak: even v6, which failed on room temperature, reports 0/30 there. The nominal 95% upper bounds are about 1.9% for 0/189 on cryo and 12% for 0/30 on the third collection.
 
-According to the [amendments](PREREGISTRATION.md) and [evidence summary](REPORT.md#evidence), v11's rules were chosen on the cryo and room-temperature collections and fixed before any third-collection trial or judged procedure ran. Before that freeze, the third collection had been processed and its correlations with labelled room-temperature crystals used to swap the species labels of its two batches of eight. The holdout chronology rests on these records; the original commit history is not included.
+According to the [amendments](PREREGISTRATION.md) and [procedure comparisons](FINDINGS.md#f4-a-procedure-that-finds-smaller-groups-and-its-held-out-judgements), v11's rules were chosen on the cryo and room-temperature collections and fixed before any third-collection trial or judged procedure ran. Before that freeze, the third collection had been processed and its correlations with labelled room-temperature crystals used to swap the species labels of its two batches of eight. The holdout chronology rests on these records; the original commit history is not included.
 
-These are species differences, not ligand binding. A useful next test would have independently known ligand-bound or other subtly different crystals, plus enough controls to expose false splits. The analysis also leaves 23 cryo and six room-temperature minorities separable under its diagnostic criteria but missed by v11. Its estimated data limits depend on those criteria, not a proof that no better method exists. [Open questions](REPORT.md#what-remains-open).
+These are species differences, not ligand binding. A useful next test would have independently known ligand-bound or other subtly different crystals, plus enough controls to expose false splits. The analysis also leaves [23 cryo and six room-temperature minorities](COMPLETE.md#7-every-remaining-limit-belongs-to-the-problem-itself) separable under its diagnostic criteria but missed by v11. Its [estimated data limits](FINDINGS.md#f6-what-limits-v11-the-data) depend on those criteria, not a proof that no better method exists. Other limits come from [noise known only from repeat measurements](FINDINGS.md#f5-counting-noise-of-dialss-pairwise-correlations) and [structure inside one species](FINDINGS.md#f8-room-temperature-crystals-of-one-species-hold-sub-groups-as-distinct-as-a-species).
 
 ## Reproduce or try the patch
 
@@ -49,8 +49,8 @@ python3 figures/make_figures.py
 
 The script writes PNG, SVG, CSV and an input-checksum manifest into `figures/`. It does not rerun diffraction processing.
 
-`bash reproduce.sh report` regenerates the full reports from the records without DIALS or raw images. It rewrites the report documents. [Reproduction instructions](REPRODUCTION.md) cover the pinned environment and the full experiment, which downloads about 71 GB of images.
+`bash reproduce.sh report` regenerates `results/report/numbers.json`, `FINDINGS.md` and `COMPLETE.md` from the records without DIALS or raw images. [Reproduction instructions](REPRODUCTION.md) cover the pinned environment and the full experiment, which downloads about 71 GB of images.
 
 For DIALS developers: [patch instructions and parameters](dials-patch/README.md). After applying the patch to 3.30.1, enable `significant_clusters.find_small_groups=True`. The recorded correlation and regression suite has 48 passes. In 72 sampled end-to-end trials, v11 adds no failures beyond the baseline, but agrees with saved-array scoring in 71/72 outcomes. An inherited dataset-name mapping issue remains at short wedges ([F9](FINDINGS.md#f9-a-defect-of-todays-dials-names-shifted-when-cosym-drops-a-data-set)).
 
-[Findings](FINDINGS.md) | [Full report](REPORT.md) | [Definitions and amendments](PREREGISTRATION.md) | [Provenance](PROVENANCE.json)
+[Findings](FINDINGS.md) | [Benchmark checks](COMPLETE.md) | [Definitions and amendments](PREREGISTRATION.md) | [Provenance](PROVENANCE.json)

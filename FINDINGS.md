@@ -278,8 +278,9 @@ they were frozen, is their held-out judgement (F10).
 22 room-temperature single-population trials where today's DIALS reports none (and in none where only
 today's does; cryo: 0 and 0), although it finds 555 more minorities. The groups it adds hold two
 to four crystals of one species that stand out as strongly as a species minority does at room
-temperature (F8). Every other procedure frozen before room temperature raised it too (`REPORT.md`, the
-frontier).
+temperature (F8). Every other procedure frozen before room temperature raised it too
+([results/report/numbers.json](results/report/numbers.json), `rt|frontier`; procedures frozen in
+`PREREGISTRATION.md` amendments 3-13).
 
 
 The configurations chosen after it, paired with today's DIALS on the same single-population trials:

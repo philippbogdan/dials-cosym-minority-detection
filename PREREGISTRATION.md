@@ -649,7 +649,7 @@ cryo already had every size. The records already written are supplemented by the
 every classification is recomputed for every procedure. The change can only move a minority from
 separable to a limit of the data; the classification with the design's sizes only is kept
 (`classify(design_sizes_only=True)`) and how many minorities each procedure's classification moves is
-reported (`REPORT.md`).
+reported ([results/report/numbers.json](results/report/numbers.json), `cryo|amendment24` and `rt|amendment24`).
 
 ## Amendment 25 (the third collection's labels; before any trial on it)
 

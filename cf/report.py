@@ -1,4 +1,4 @@
-"""Every number of FINDINGS.md / REPORT.md / COMPLETE.md, computed from the results files.
+"""Every number of FINDINGS.md / COMPLETE.md, computed from the results files.
 
 Writes results/report/numbers.json. Each entry says which procedure, which trials and which
 reference (Zenodo species labels, the paper, the limit analyses) it is computed against.

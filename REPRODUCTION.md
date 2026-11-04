@@ -1,7 +1,7 @@
 # Commands and inputs
 
 `bash reproduce.sh report` reads the committed records, writes `results/report/numbers.json`
-and renders `COMPLETE.md`, `FINDINGS.md` and `REPORT.md`. It needs Python 3 with NumPy, SciPy
+and renders `COMPLETE.md` and `FINDINGS.md`. It needs Python 3 with NumPy, SciPy
 and Jinja2. If these are unavailable, the script creates `.venv-report` and installs
 `requirements-report.txt`. No DIALS installation, diffraction images or external source
 tree is needed for this step. `REPORT_PYTHON` can select a Python executable.

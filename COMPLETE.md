@@ -1,9 +1,11 @@
 # COMPLETE
 
-Status of the goal (GOAL.md, "Done"), measured from the results files of commit `458cb6bcd63306d74e83e5fa45f492897c64f4a1`
+This document checks four deliverables: today's DIALS detection limit, the cause of its misses,
+a tested improvement and reproducible findings. It also checks agreement with the paper and the
+remaining limits. Measurements are from the results files of commit `458cb6bcd63306d74e83e5fa45f492897c64f4a1`
 (`python -m cf.report && python -m cf.render`; `bash reproduce.sh` regenerates every number from the
 raw data). Each line gives the measurement and the reference it is checked against; details in
-`FINDINGS.md` (claims and evidence) and `REPORT.md` (criteria before and after, failures, open items).
+`FINDINGS.md` (claims and evidence, including the held-out judgements and limits).
 
 ## 1. Today's DIALS reproduces the published separation
 
@@ -115,7 +117,7 @@ none, 59 more minorities.
 
 ## 5. Deliverable 4
 
-`FINDINGS.md`, `REPORT.md`, this file; `bash reproduce.sh` (one command, staged; `bash reproduce.sh report`
+`FINDINGS.md` and this file; `bash reproduce.sh` (one command, staged; `bash reproduce.sh report`
 re-derives every number from the results files).
 
 ## 6. The smallest detectable group and its cause, for today's DIALS and v11, both collections
@@ -275,4 +277,4 @@ F10), and across the collections, in every cell, its detection limit is the limi
 configuration for every sample. Per collection (a procedure told which kind of sample it has), it gives up the cells listed above:
 smaller groups separable from the structure of that collection's own crystals but not from that of the
 other's. The individual minorities listed above are separable in the data but missed by v11; they are open
-(`REPORT.md`).
+(`FINDINGS.md` F6, F8).

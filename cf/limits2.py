@@ -1,4 +1,4 @@
-"""Post-hoc refinement of the limits (written after the oracle results; see REPORT.md):
+"""Post-hoc refinement of the limits (written after the oracle results; see PREREGISTRATION.md amendment 3):
 what an UNSUPERVISED procedure with a low false-group rate can find at best.
 
 For a mixture trial with minority M (size k), on the rank-1 residuals e of DIALS's rij:
